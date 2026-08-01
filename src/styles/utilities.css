@@ -1,0 +1,81 @@
+/**
+ * Custom Design System Utility Classes
+ */
+
+/* Typography Utilities */
+.text-display {
+  font-size: var(--font-size-display);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.02em;
+}
+
+.text-h1 {
+  font-size: var(--font-size-h1);
+  line-height: var(--line-height-tight);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.015em;
+}
+
+.text-h2 {
+  font-size: var(--font-size-h2);
+  line-height: var(--line-height-snug);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.01em;
+}
+
+.text-h3 {
+  font-size: var(--font-size-h3);
+  line-height: var(--line-height-snug);
+  font-weight: var(--font-weight-semibold);
+}
+
+.text-body-lg {
+  font-size: var(--font-size-body-lg);
+  line-height: var(--line-height-relaxed);
+  font-weight: var(--font-weight-regular);
+}
+
+.text-body {
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-regular);
+}
+
+.text-small {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-normal);
+  font-weight: var(--font-weight-regular);
+}
+
+.text-muted-custom {
+  color: var(--color-text-muted);
+}
+
+/* Surface & Background Utilities */
+.bg-surface {
+  background-color: var(--color-surface);
+}
+
+.bg-background-custom {
+  background-color: var(--color-background);
+}
+
+.border-custom {
+  border-color: var(--color-border);
+}
+
+.text-primary-custom {
+  color: var(--color-text-primary);
+}
+
+.text-secondary-custom {
+  color: var(--color-text-secondary);
+}
+
+/* Smooth Transitions */
+.transition-standard {
+  transition-property: color, background-color, border-color, box-shadow, transform;
+  transition-duration: var(--duration-normal);
+  transition-timing-function: var(--ease-in-out);
+}
