@@ -3,341 +3,336 @@ import { Section } from "../ui/section";
 import { SectionHeading } from "../ui/section-heading";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
-import { AcademicProfiles } from "./AcademicProfiles";
 
-export interface ResearchInterest {
+export interface ResearchInterestItem {
   title: string;
   description: string;
   icon: React.ReactNode;
-  tags: string[];
 }
 
-export interface TimelineEvent {
-  year: string;
-  role: string;
-  institution: string;
+export interface AcademicProfileItem {
+  name: string;
   description: string;
+  url: string;
+  icon: React.ReactNode;
+  badgeText: string;
 }
 
-export interface StatItem {
-  label: string;
+export interface QuickFactItem {
+  title: string;
   value: string;
-  change?: string;
+  description: string;
   icon: React.ReactNode;
 }
 
 export interface ProfessorHighlightsProps {
-  researchInterests?: ResearchInterest[];
-  academicExpertise?: string[];
-  timeline?: TimelineEvent[];
-  stats?: StatItem[];
-  googleScholarUrl?: string;
-  scopusUrl?: string;
-  orcidUrl?: string;
-  researchGateUrl?: string;
   className?: string;
 }
 
 export const ProfessorHighlights: React.FC<ProfessorHighlightsProps> = ({
-  researchInterests = [
+  className = "",
+}) => {
+  // SECTION 1: Research Interests Data (6 requested domains)
+  const researchInterests: ResearchInterestItem[] = [
     {
-      title: "Deep Learning & Neural Architectures",
+      title: "Artificial Intelligence",
       description:
-        "Developing scalable foundation models, transformer efficiency, and self-supervised learning representations.",
-      tags: ["Transformers", "Self-Supervised", "Model Scaling"],
+        "Autonomous agents, multi-agent systems, and decision-making frameworks under uncertainty.",
       icon: (
-        <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+        <svg className="w-6 h-6 text-blue-600 dark:text-blue-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 2a10 10 0 100 20 10 10 0 000-20zM12 6v6l4 2" />
+        </svg>
+      ),
+    },
+    {
+      title: "Machine Learning",
+      description:
+        "Supervised, unsupervised, and reinforcement learning algorithm design and optimization.",
+      icon: (
+        <svg className="w-6 h-6 text-indigo-600 dark:text-indigo-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      ),
+    },
+    {
+      title: "Deep Learning",
+      description:
+        "Transformer architectures, deep neural networks, and self-supervised representation learning.",
+      icon: (
+        <svg className="w-6 h-6 text-amber-600 dark:text-amber-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
           <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
       ),
     },
     {
-      title: "Automated Reasoning & Verification",
+      title: "Computer Vision",
       description:
-        "Formal methods, automated theorem proving, and safety verification for critical AI autonomous systems.",
-      tags: ["Formal Methods", "Theorem Proving", "AI Safety"],
+        "Object detection, 3D scene reconstruction, video processing, and visual reasoning.",
       icon: (
-        <svg className="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+        <svg className="w-6 h-6 text-emerald-600 dark:text-emerald-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+      ),
+    },
+    {
+      title: "Natural Language Processing",
+      description:
+        "Large language models (LLMs), computational linguistics, and semantic search systems.",
+      icon: (
+        <svg className="w-6 h-6 text-teal-600 dark:text-teal-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      ),
+    },
+    {
+      title: "Cyber Security",
+      description:
+        "Cryptographic protocols, system vulnerability identification, and privacy-preserving ML.",
+      icon: (
+        <svg className="w-6 h-6 text-rose-600 dark:text-rose-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
         </svg>
       ),
     },
+  ];
+
+  // SECTION 2: Academic Profiles Data (5 requested platforms)
+  const academicProfiles: AcademicProfileItem[] = [
     {
-      title: "Ethical AI & Governance",
+      name: "Google Scholar",
       description:
-        "Algorithmic fairness, explainability (XAI), privacy-preserving machine learning, and AI regulatory policy.",
-      tags: ["XAI", "Fairness", "Privacy-Preserving"],
+        "Comprehensive index of citations, h-index tracking, and peer-reviewed scholarly publications.",
+      url: "https://scholar.google.com",
+      badgeText: "Citations & Metrics",
       icon: (
-        <svg className="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+        <svg className="w-6 h-6 fill-current text-blue-600 dark:text-blue-400" viewBox="0 0 24 24">
+          <path d="M12 24a7 7 0 1 1 0-14 7 7 0 0 1 0 14zm0-24L0 9.5l12 9.5 12-9.5L12 0zm-8.4 12v3.6L12 21.6l8.4-6V12L12 18.6 3.6 12z" />
         </svg>
       ),
     },
     {
-      title: "Bioinformatics & Health AI",
+      name: "Scopus",
       description:
-        "Applying multimodal AI to genomic analysis, drug discovery, and predictive clinical diagnostic systems.",
-      tags: ["Genomics", "Clinical AI", "Drug Discovery"],
+        "Elsevier abstract and citation database tracking authoritative peer-reviewed scientific literature.",
+      url: "https://www.scopus.com",
+      badgeText: "Author ID",
       icon: (
-        <svg className="w-6 h-6 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+        <svg className="w-6 h-6 fill-current text-amber-600 dark:text-amber-400" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm-1-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm5 7h-2v-3c0-.55-.45-1-1-1s-1 .45-1 1v3h-2v-6h2v1.1c.37-.63 1.05-1.1 1.83-1.1 1.19 0 2.17.98 2.17 2.17V17z" />
+        </svg>
+      ),
+    },
+    {
+      name: "ResearchGate",
+      description:
+        "Professional network for researchers to share papers, collaborate, and track scientific impact.",
+      url: "https://www.researchgate.net",
+      badgeText: "RG Score",
+      icon: (
+        <svg className="w-6 h-6 fill-current text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24">
+          <path d="M19.54 0c1.356 0 2.46 1.104 2.46 2.472v19.056c0 1.368-1.104 2.472-2.46 2.472H4.46C3.104 24 2 22.896 2 21.528V2.472C2 1.104 3.104 0 4.46 0h15.08zM17.5 13.5h-3.2v-2.1h3.2c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5h-5.2v10.1h2v-3.5h3.2c1.93 0 3.5-1.57 3.5-3.5s-1.57-3.5-3.5-3.5h-7.2v10.1h2V7.4h5.2c1.93 0 3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5z" />
+        </svg>
+      ),
+    },
+    {
+      name: "ORCID",
+      description:
+        "Persistent digital identifier distinguishing research contributions across global repositories.",
+      url: "https://orcid.org",
+      badgeText: "ORCID iD",
+      icon: (
+        <svg className="w-6 h-6 fill-current text-teal-600 dark:text-teal-400" viewBox="0 0 24 24">
+          <path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zM7.369 4.378c.525 0 .947.431.947.947s-.422.947-.947.947a.95.95 0 0 1-.947-.947c0-.516.422-.947.947-.947zm-.722 3.038h1.444v10.041H6.647V7.416zm3.562 0h3.9c3.712 0 5.344 2.653 5.344 5.025 0 2.578-2.016 5.016-5.325 5.016h-3.919V7.416zm1.444 1.303v7.434h2.238c2.438 0 3.825-1.5 3.825-3.713 0-2.053-1.256-3.721-3.713-3.721h-2.35z" />
+        </svg>
+      ),
+    },
+    {
+      name: "DBLP",
+      description:
+        "Computer science bibliography database listing open-access computer science publications.",
+      url: "https://dblp.org",
+      badgeText: "CS Bibliography",
+      icon: (
+        <svg className="w-6 h-6 fill-current text-cyan-600 dark:text-cyan-400" viewBox="0 0 24 24">
+          <path d="M4 3h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1zm2 3v12h12V6H6zm2 2h8v2H8V8zm0 4h8v2H8v-2z" />
+        </svg>
+      ),
+    },
+  ];
+
+  // SECTION 3: Quick Facts Data (4 animated statistics cards)
+  const quickFacts: QuickFactItem[] = [
+    {
+      title: "Experience",
+      value: "15+ Years",
+      description: "Academic research leadership and university faculty tenure",
+      icon: (
+        <svg className="w-6 h-6 text-blue-600 dark:text-blue-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+    {
+      title: "Research Projects",
+      value: "30+ Projects",
+      description: "Funded grants by NSF, IEEE, and leading industrial sponsors",
+      icon: (
+        <svg className="w-6 h-6 text-amber-600 dark:text-amber-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
           <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L5.594 15.12a2 2 0 00-1.464.305l-1.071.714a2 2 0 00-.819 1.95l.484 2.906A2 2 0 004.693 23h14.614a2 2 0 001.969-1.605l.484-2.906a2 2 0 00-.819-1.95l-1.071-.714z" />
         </svg>
       ),
     },
-  ],
-  academicExpertise = [
-    "Machine Learning & Deep Neural Nets",
-    "Computer Vision & Pattern Recognition",
-    "Natural Language Processing (NLP)",
-    "Reinforcement Learning",
-    "Graph Neural Networks (GNNs)",
-    "Distributed Systems & HPC",
-    "AI Governance & Policy",
-    "Algorithmic Complexity",
-  ],
-  timeline = [
     {
-      year: "2021 — Present",
-      role: "Full Professor & Chair of AI",
-      institution: "Department of Computer Science & AI Research Center",
-      description:
-        "Leading university AI research initiatives, directing doctoral scholars, and securing major competitive grants.",
-    },
-    {
-      year: "2016 — 2021",
-      role: "Associate Professor",
-      institution: "School of Engineering & Applied Sciences",
-      description:
-        "Spearheaded multi-institutional research on trustworthy neural networks and automated verification.",
-    },
-    {
-      year: "2012 — 2016",
-      role: "Assistant Professor & Research Fellow",
-      institution: "Institute for Advanced Computational Science",
-      description:
-        "Established the AI Safety & Systems Laboratory and published seminal work on model interpretability.",
-    },
-    {
-      year: "2008 — 2012",
-      role: "Ph.D. in Computer Science",
-      institution: "Graduate School of Engineering",
-      description:
-        "Dissertation focused on scalable machine learning algorithms and neural network optimization.",
-    },
-  ],
-  stats = [
-    {
-      label: "Total Citations",
-      value: "12,450+",
-      change: "+1,200 this year",
+      title: "Graduated Students",
+      value: "25+ Scholars",
+      description: "Mentored Ph.D. alumni and Master's thesis researchers",
       icon: (
-        <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        <svg className="w-6 h-6 text-emerald-600 dark:text-emerald-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
       ),
     },
     {
-      label: "h-index",
-      value: "48",
-      change: "Top 2% Globally",
+      title: "Awards",
+      value: "12 Honors",
+      description: "Prestigious national & international scientific achievements",
       icon: (
-        <svg className="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        <svg className="w-6 h-6 text-rose-600 dark:text-rose-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
         </svg>
       ),
     },
-    {
-      label: "i10-index",
-      value: "112",
-      change: "112 High-Impact Papers",
-      icon: (
-        <svg className="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-        </svg>
-      ),
-    },
-    {
-      label: "Research Funding",
-      value: "$4.8M+",
-      change: "NSF & Industry Grants",
-      icon: (
-        <svg className="w-5 h-5 text-teal-600 dark:text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
-    },
-  ],
-  googleScholarUrl,
-  scopusUrl,
-  orcidUrl,
-  researchGateUrl,
-  className = "",
-}) => {
+  ];
+
   return (
     <Section variant="surface" padding="lg" className={`relative overflow-hidden ${className}`}>
-      <div className="space-y-16">
-        {/* Section Header */}
-        <SectionHeading
-          eyebrow="Academic Highlights"
-          title="Scholarly Impact & Focus Areas"
-          description="Overview of research domain specializations, citation metrics, scholarly indices, and academic career trajectory."
-          align="center"
-        />
-
-        {/* 1. Four Animated Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="group relative p-6 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-700 transition-all duration-300 hover:-translate-y-1"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:scale-110 transition-transform duration-300">
-                  {stat.icon}
-                </div>
-                {stat.change && (
-                  <Badge variant="outline" size="sm" className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                    {stat.change}
-                  </Badge>
-                )}
-              </div>
-
-              <span className="block text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
-                {stat.value}
-              </span>
-              <span className="block mt-1 text-sm font-semibold text-slate-600 dark:text-slate-300">
-                {stat.label}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* 2. Academic Profiles Bar */}
-        <div className="space-y-4">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center sm:text-left">
-            Scholarly Indexing & Profiles
-          </h3>
-          <AcademicProfiles
-            googleScholarUrl={googleScholarUrl}
-            scopusUrl={scopusUrl}
-            orcidUrl={orcidUrl}
-            researchGateUrl={researchGateUrl}
+      <div className="space-y-20">
+        {/* SECTION 1: Research Interests */}
+        <div className="space-y-10">
+          <SectionHeading
+            eyebrow="Specialized Domains"
+            title="Research Interests"
+            description="Core computer science and artificial intelligence research pillars driving laboratory investigations."
+            align="center"
           />
-        </div>
 
-        {/* 3. Research Interests & Academic Expertise Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Research Interests (Left Column 7 cols) */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 font-sans">
-                Research Focus & Domains
-              </h3>
-              <Badge variant="primary" size="sm">
-                4 Key Pillars
-              </Badge>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {researchInterests.map((interest) => (
-                <Card
-                  key={interest.title}
-                  variant="default"
-                  hover
-                  className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 p-5 flex flex-col justify-between"
-                >
-                  <CardHeader className="p-0 pb-3">
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 shrink-0">
-                        {interest.icon}
-                      </div>
-                      <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 leading-snug">
-                        {interest.title}
-                      </CardTitle>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {researchInterests.map((item) => (
+              <Card
+                key={item.title}
+                variant="default"
+                hover
+                className="group relative p-6 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
+              >
+                <CardHeader className="p-0 pb-3">
+                  <div className="flex items-center gap-3.5 mb-3">
+                    <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 group-hover:scale-110 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 transition-all duration-300">
+                      {item.icon}
                     </div>
-                    <CardDescription className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                      {interest.description}
-                    </CardDescription>
-                  </CardHeader>
-
-                  <CardContent className="p-0 pt-3 flex flex-wrap gap-1.5 border-t border-slate-100 dark:border-slate-800/60 mt-2">
-                    {interest.tags.map((tag) => (
-                      <Badge key={tag} variant="outline" size="sm" className="text-[10px]">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          {/* Academic Expertise Tags (Right Column 5 cols) */}
-          <div className="lg:col-span-5 space-y-6">
-            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 font-sans">
-              Core Academic Expertise
-            </h3>
-
-            <div className="p-6 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                Specialized technical domains and interdisciplinary areas of research expertise:
-              </p>
-
-              <div className="flex flex-wrap gap-2">
-                {academicExpertise.map((skill) => (
-                  <span
-                    key={skill}
-                    className="inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-600 transition-colors duration-150 cursor-default"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400 mr-2 shrink-0"></span>
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
+                    <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors">
+                      {item.title}
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <CardDescription className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
+                    {item.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
 
-        {/* 4. Academic Career Timeline Preview */}
-        <div className="space-y-8 pt-6 border-t border-slate-200/80 dark:border-slate-800/80">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 font-sans">
-                Academic & Professional Timeline
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Faculty appointments, research leadership, and academic milestones
-              </p>
-            </div>
-            <Badge variant="accent" size="md">
-              Career Trajectory
-            </Badge>
-          </div>
+        {/* SECTION 2: Academic Profiles */}
+        <div className="space-y-10 pt-8 border-t border-slate-200/80 dark:border-slate-800/80">
+          <SectionHeading
+            eyebrow="Scholarly Indexing"
+            title="Academic Profiles"
+            description="Verified digital identifiers and bibliographic databases tracking publications and citation metrics."
+            align="center"
+          />
 
-          <div className="relative pl-6 sm:pl-8 border-l-2 border-slate-200 dark:border-slate-800 space-y-8">
-            {timeline.map((event) => (
-              <div key={event.year + event.role} className="relative group">
-                {/* Bullet node */}
-                <div className="absolute -left-[31px] sm:-left-[39px] top-1.5 w-4 h-4 rounded-full border-2 border-white dark:border-slate-900 bg-blue-900 dark:bg-blue-500 group-hover:scale-125 transition-transform duration-200" />
-
-                <div className="p-5 rounded-2xl bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 shadow-xs group-hover:shadow-md transition-all duration-200">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
-                    <span className="text-xs font-bold text-blue-900 dark:text-blue-400 uppercase tracking-wider font-mono">
-                      {event.year}
-                    </span>
-                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                      {event.institution}
-                    </span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+            {academicProfiles.map((profile) => (
+              <a
+                key={profile.name}
+                href={profile.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative flex flex-col justify-between p-5 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-600 transition-all duration-300 hover:-translate-y-1.5"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 group-hover:scale-110 transition-transform duration-300">
+                      {profile.icon}
+                    </div>
+                    <Badge variant="outline" size="sm" className="text-[10px]">
+                      {profile.badgeText}
+                    </Badge>
                   </div>
 
-                  <h4 className="text-base font-bold text-slate-900 dark:text-slate-100 font-sans">
-                    {event.role}
+                  <h4 className="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors">
+                    {profile.name}
                   </h4>
-
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-                    {event.description}
+                  <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 leading-relaxed font-normal">
+                    {profile.description}
                   </p>
                 </div>
+
+                <div className="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-xs font-semibold text-blue-900 dark:text-blue-400">
+                  <span>Visit Profile</span>
+                  <svg
+                    className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* SECTION 3: Quick Facts (4 Animated Cards) */}
+        <div className="space-y-10 pt-8 border-t border-slate-200/80 dark:border-slate-800/80">
+          <SectionHeading
+            eyebrow="Key Metrics"
+            title="Quick Facts"
+            description="Overview of faculty experience, research grants, student mentorship, and academic recognitions."
+            align="center"
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {quickFacts.map((fact) => (
+              <div
+                key={fact.title}
+                className="group relative p-6 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:border-blue-400 dark:hover:border-blue-600 transition-all duration-300 hover:-translate-y-1.5"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 group-hover:scale-110 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 transition-all duration-300">
+                    {fact.icon}
+                  </div>
+                  <Badge variant="primary" size="sm" className="text-[10px] uppercase font-bold">
+                    Stat
+                  </Badge>
+                </div>
+
+                <span className="block text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+                  {fact.value}
+                </span>
+
+                <h4 className="mt-1 text-sm font-bold text-blue-900 dark:text-blue-400 font-sans">
+                  {fact.title}
+                </h4>
+
+                <p className="mt-2 text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
+                  {fact.description}
+                </p>
               </div>
             ))}
           </div>
