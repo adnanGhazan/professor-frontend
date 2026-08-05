@@ -1,108 +1,54 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
+import { ResearchArea } from "@/src/types/research-area";
+import { ResearchAreaService } from "@/src/services/research-area.service";
 import { Section } from "../ui/section";
 import { SectionHeading } from "../ui/section-heading";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 
-export interface ResearchAreaItem {
-  id: string;
-  title: string;
-  description: string;
-  publicationsCount: string;
-  icon: React.ReactNode;
-  tags?: string[];
-}
-
 export interface ResearchAreasProps {
-  areas?: ResearchAreaItem[];
   className?: string;
 }
 
-export const ResearchAreas: React.FC<ResearchAreasProps> = ({
-  areas = [
-    {
-      id: "ai",
-      title: "Artificial Intelligence",
-      description:
-        "Autonomous agents, multi-agent coordination, heuristic search, and decision-making under complex uncertain environments.",
-      publicationsCount: "42 Publications",
-      tags: ["Autonomous Agents", "Multi-Agent", "Heuristic Search"],
-      icon: (
-        <svg className="w-6 h-6 text-blue-600 dark:text-blue-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 2a10 10 0 100 20 10 10 0 000-20zM12 6v6l4 2" />
-        </svg>
-      ),
-    },
-    {
-      id: "ml",
-      title: "Machine Learning",
-      description:
-        "Supervised and unsupervised learning algorithms, statistical modeling, hyperparameter optimization, and generalization bounds.",
-      publicationsCount: "58 Publications",
-      tags: ["Optimization", "Statistical Learning", "Algorithmic Bounds"],
-      icon: (
-        <svg className="w-6 h-6 text-indigo-600 dark:text-indigo-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      ),
-    },
-    {
-      id: "dl",
-      title: "Deep Learning",
-      description:
-        "Transformer architectures, deep neural network optimization, self-supervised pre-training, and generative AI models.",
-      publicationsCount: "36 Publications",
-      tags: ["Transformers", "Generative AI", "Representation Learning"],
-      icon: (
-        <svg className="w-6 h-6 text-amber-600 dark:text-amber-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>
-      ),
-    },
-    {
-      id: "cv",
-      title: "Computer Vision",
-      description:
-        "Object detection, 3D spatial scene reconstruction, medical image diagnosis, and real-time visual reasoning systems.",
-      publicationsCount: "29 Publications",
-      tags: ["3D Vision", "Medical Imaging", "Object Detection"],
-      icon: (
-        <svg className="w-6 h-6 text-emerald-600 dark:text-emerald-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-        </svg>
-      ),
-    },
-    {
-      id: "nlp",
-      title: "Natural Language Processing",
-      description:
-        "Large language models (LLMs), computational linguistics, semantic parsing, cross-lingual translation, and alignment.",
-      publicationsCount: "31 Publications",
-      tags: ["LLMs", "Semantic Parsing", "Computational Linguistics"],
-      icon: (
-        <svg className="w-6 h-6 text-teal-600 dark:text-teal-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-      ),
-    },
-    {
-      id: "security",
-      title: "Cyber Security",
-      description:
-        "Cryptographic protocols, system vulnerability assessment, network intrusion detection, and privacy-preserving ML.",
-      publicationsCount: "24 Publications",
-      tags: ["Cryptography", "System Security", "Privacy ML"],
-      icon: (
-        <svg className="w-6 h-6 text-rose-600 dark:text-rose-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-        </svg>
-      ),
-    },
-  ],
-  className = "",
-}) => {
+export const ResearchAreas: React.FC<ResearchAreasProps> = ({ className = "" }) => {
+  const [areas, setAreas] = useState<ResearchArea[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [failedImageIds, setFailedImageIds] = useState<Record<string | number, boolean>>({});
+
+  const fetchAreas = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await ResearchAreaService.getPublicResearchAreas();
+      // Ensure only visible items are shown and sorted by sort_order ascending
+      const visibleSorted = data
+        .filter((item) => item.is_visible !== false)
+        .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      setAreas(visibleSorted);
+    } catch (err: unknown) {
+      console.error("Failed to load public research areas:", err);
+      setError("Unable to load research areas at this time.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchAreas();
+  }, [fetchAreas]);
+
+  const handleImageError = (id: string | number) => {
+    setFailedImageIds((prev) => ({ ...prev, [id]: true }));
+  };
+
+  // Limit display to top 6 visible records
+  const displayedAreas = areas.slice(0, 6);
+
   return (
     <Section variant="default" padding="lg" className={`relative overflow-hidden ${className}`}>
       {/* Background Decorative Gradient Orbs */}
@@ -115,81 +61,191 @@ export const ResearchAreas: React.FC<ResearchAreasProps> = ({
         aria-hidden="true"
       />
 
-      <div className="relative z-10 space-y-12">
+      <div className="relative z-10 space-y-12 max-w-7xl mx-auto">
         {/* Section Heading */}
         <SectionHeading
           eyebrow="Specialization"
           title="Research Areas"
-          description="Current research domains and expertise."
+          description="Current research domains, core scientific focus, and active exploration."
           align="center"
         />
 
-        {/* Responsive Grid of Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {areas.map((area) => (
-            <Card
-              key={area.id}
-              variant="default"
-              hover
-              className="group relative flex flex-col justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-blue-400 dark:hover:border-blue-600"
+        {/* LOADING SKELETON STATE */}
+        {isLoading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map((skeletonId) => (
+              <div
+                key={skeletonId}
+                className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 space-y-4 animate-pulse"
+              >
+                <div className="w-full h-44 rounded-2xl bg-slate-200 dark:bg-slate-800" />
+                <div className="flex items-center justify-between pt-2">
+                  <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-2/3" />
+                  <div className="h-5 bg-slate-200 dark:bg-slate-800 rounded w-1/4" />
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3.5 bg-slate-200 dark:bg-slate-800 rounded w-full" />
+                  <div className="h-3.5 bg-slate-200 dark:bg-slate-800 rounded w-4/5" />
+                </div>
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                  <div className="h-8 bg-slate-200 dark:bg-slate-800 rounded-xl w-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* ERROR STATE WITH RETRY BUTTON */}
+        {!isLoading && error && (
+          <div className="p-8 rounded-3xl bg-red-500/10 border border-red-500/20 text-center space-y-4 max-w-xl mx-auto">
+            <div className="w-12 h-12 rounded-2xl bg-red-500/20 flex items-center justify-center mx-auto text-red-400">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                Failed to Load Research Areas
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                {error}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchAreas}
+              className="mt-2 border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/10"
             >
-              <div>
-                {/* Header: Icon & Publication Count Badge */}
-                <CardHeader className="p-0 pb-4 flex flex-row items-center justify-between space-y-0">
-                  <div className="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 group-hover:scale-110 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 transition-all duration-300">
-                    {area.icon}
-                  </div>
-                  <Badge variant="primary" size="sm" className="font-semibold text-xs">
-                    {area.publicationsCount}
-                  </Badge>
-                </CardHeader>
+              Retry Loading
+            </Button>
+          </div>
+        )}
 
-                {/* Content: Title & Description */}
-                <CardContent className="p-0 pt-2 space-y-3">
-                  <CardTitle className="text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors font-sans">
-                    {area.title}
-                  </CardTitle>
-                  <CardDescription className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
-                    {area.description}
-                  </CardDescription>
-                </CardContent>
-              </div>
+        {/* EMPTY STATE */}
+        {!isLoading && !error && displayedAreas.length === 0 && (
+          <div className="p-12 rounded-3xl bg-white/60 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 text-center space-y-3 max-w-md mx-auto">
+            <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                <path d="M2 12h20" />
+              </svg>
+            </div>
+            <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
+              No Research Areas Available
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Research areas will be updated shortly. Check back soon.
+            </p>
+          </div>
+        )}
 
-              {/* Footer: Learn More Action Button & Tags */}
-              <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800/60 space-y-4">
-                {area.tags && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {area.tags.map((tag) => (
-                      <Badge key={tag} variant="outline" size="sm" className="text-[10px]">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
+        {/* CARDS GRID VIEW */}
+        {!isLoading && !error && displayedAreas.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {displayedAreas.map((area) => {
+              const hasValidImage = Boolean(area.image_url) && !failedImageIds[area.id];
+              const shortDesc = area.short_description && area.short_description.trim().length > 0
+                ? area.short_description
+                : "Research details will be added soon.";
 
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  fullWidth
-                  className="justify-between text-blue-900 dark:text-blue-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 font-semibold"
-                  rightIcon={
-                    <svg
-                      className="w-4 h-4 group-hover:translate-x-1 transition-transform"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      strokeWidth="2"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                  }
+              return (
+                <Card
+                  key={area.id}
+                  variant="default"
+                  hover
+                  className="group relative flex flex-col justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-blue-400 dark:hover:border-blue-600 rounded-3xl"
                 >
-                  Learn More
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
+                  <div className="space-y-4">
+                    {/* Cover Image / Fallback Graphic */}
+                    <div className="relative w-full h-44 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 flex items-center justify-center shrink-0">
+                      {hasValidImage ? (
+                        <img
+                          src={area.image_url!}
+                          alt={area.title}
+                          onError={() => handleImageError(area.id)}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-4 text-center text-slate-400 dark:text-slate-600">
+                          <svg
+                            className="w-10 h-10 mb-1 group-hover:scale-110 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-all duration-300"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                          >
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                            <path d="M2 12h20" />
+                          </svg>
+                          <span className="text-[10px] font-mono tracking-wider uppercase text-slate-400">
+                            Research Domain
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Featured Badge Overlay */}
+                      {area.is_featured && (
+                        <div className="absolute top-3 right-3 z-10">
+                          <Badge
+                            variant="primary"
+                            size="sm"
+                            className="bg-amber-500/90 text-slate-950 font-bold border border-amber-400 shadow-md backdrop-blur-md px-2.5 py-0.5"
+                          >
+                            ★ Featured
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content: Title & Short Description */}
+                    <CardHeader className="p-0 space-y-2">
+                      <CardTitle className="text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors font-sans">
+                        {area.title}
+                      </CardTitle>
+                    </CardHeader>
+
+                    <CardContent className="p-0">
+                      <CardDescription className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal line-clamp-3">
+                        {shortDesc}
+                      </CardDescription>
+                    </CardContent>
+                  </div>
+
+                  {/* Footer: Learn More Action Button */}
+                  <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800/60">
+                    <Link href="/research" className="w-full block">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        fullWidth
+                        className="justify-between text-blue-900 dark:text-blue-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 font-semibold cursor-pointer"
+                        rightIcon={
+                          <svg
+                            className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            strokeWidth="2"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          </svg>
+                        }
+                      >
+                        Learn More
+                      </Button>
+                    </Link>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
     </Section>
   );
