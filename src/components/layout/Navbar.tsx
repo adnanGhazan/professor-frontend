@@ -8,7 +8,7 @@ export interface NavigationItem {
 
 export const DEFAULT_NAV_ITEMS: NavigationItem[] = [
   { label: "Home", href: "/" },
-  { label: "About", href: "#about" },
+  { label: "About", href: "/about" },
   { label: "Research", href: "#research" },
   { label: "Publications", href: "#publications" },
   { label: "Teaching", href: "#teaching" },
