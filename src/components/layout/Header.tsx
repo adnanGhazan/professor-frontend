@@ -1,13 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Container } from "../ui/container";
 import { Logo } from "./Logo";
 import { Navbar, DEFAULT_NAV_ITEMS, NavigationItem } from "./Navbar";
 import { ThemeToggle } from "./ThemeToggle";
 import { MobileMenu } from "./MobileMenu";
-
+import { SiteSettingService } from "@/src/services/site-setting.service";
+import { ProfileService } from "@/src/services/profile.service";
 export interface HeaderProps {
   navItems?: NavigationItem[];
   activeHref?: string;
@@ -21,6 +22,41 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const [siteTitle, setSiteTitle] = useState<string | undefined>();
+  const [siteSubtitle, setSiteSubtitle] = useState<string | undefined>();
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string | undefined>();
+
+  useEffect(() => {
+    let isMounted = true;
+    SiteSettingService.getSiteSettings()
+      .then((settings) => {
+        if (isMounted && settings) {
+          if (settings.site_name) setSiteTitle(settings.site_name);
+          if (settings.site_tagline) setSiteSubtitle(settings.site_tagline);
+        }
+      })
+      .catch((err) => {
+        if (process.env.NODE_ENV === "development") {
+          console.error("Header failed to load site settings:", err);
+        }
+      });
+
+    ProfileService.getProfile()
+      .then((profile) => {
+        if (isMounted && profile?.profile_photo_url) {
+          setProfilePhotoUrl(profile.profile_photo_url);
+        }
+      })
+      .catch((err) => {
+        if (process.env.NODE_ENV === "development") {
+          console.error("Header failed to load profile data:", err);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const currentActiveHref = activeHref || pathname || "/";
 
@@ -30,8 +66,8 @@ export const Header: React.FC<HeaderProps> = ({
     >
       <Container size="lg" padding="normal">
         <div className="flex h-16 sm:h-20 items-center justify-between gap-4">
-          {/* Logo */}
-          <Logo />
+          {/* Dynamic Logo with Site Settings Title & Tagline */}
+          <Logo title={siteTitle} subtitle={siteSubtitle} imageUrl={profilePhotoUrl} />
 
           {/* Desktop Navigation */}
           <Navbar items={navItems} activeHref={currentActiveHref} />
@@ -46,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               onClick={() => setMobileMenuOpen(true)}
               type="button"
-              className="lg:hidden inline-flex items-center justify-center p-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-900 transition-colors"
+              className="lg:hidden inline-flex items-center justify-center p-2 rounded-lg text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-900 transition-colors cursor-pointer"
               aria-label="Open navigation menu"
               aria-expanded={mobileMenuOpen}
             >

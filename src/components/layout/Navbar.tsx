@@ -9,14 +9,15 @@ export interface NavigationItem {
 export const DEFAULT_NAV_ITEMS: NavigationItem[] = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
-  { label: "Research", href: "#research" },
-  { label: "Publications", href: "#publications" },
-  { label: "Teaching", href: "#teaching" },
-  { label: "Students", href: "#students" },
-  { label: "Awards", href: "#awards" },
-  { label: "News", href: "#news" },
-  { label: "Gallery", href: "#gallery" },
-  { label: "Contact", href: "#contact" },
+  { label: "Research", href: "/research" },
+  { label: "Publications", href: "/publications" },
+  { label: "Teaching", href: "/teaching" },
+  { label: "Students", href: "/students" },
+  { label: "Awards", href: "/awards" },
+  { label: "News", href: "/news" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Documents", href: "/documents" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export interface NavbarProps {

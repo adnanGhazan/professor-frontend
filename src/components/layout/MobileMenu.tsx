@@ -4,8 +4,8 @@ import React, { useEffect } from "react";
 import { Logo } from "./Logo";
 import { NavItem } from "./NavItem";
 import { ThemeToggle } from "./ThemeToggle";
-
-export interface NavigationItem {
+import Link from "next/link";
+export interface MobileNavigationItem {
   label: string;
   href: string;
 }
@@ -13,7 +13,7 @@ export interface NavigationItem {
 export interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
-  items: NavigationItem[];
+  items: MobileNavigationItem[];
   activeHref?: string;
 }
 
@@ -80,17 +80,24 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-1">
-          {items.map((item) => (
-            <NavItem
-              key={item.label}
-              label={item.label}
-              href={item.href}
-              isMobile
-              isActive={activeHref === item.href}
-              onClick={onClose}
-            />
-          ))}
+        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          {items.map((item) => {
+            const isActive = activeHref === item.href;
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={onClose}
+                className={`block w-full px-4 py-3 text-base font-medium rounded-xl transition-all duration-200 ${
+                  isActive
+                    ? "bg-blue-900/10 text-blue-900 dark:bg-blue-600/20 dark:text-blue-400 font-semibold"
+                    : "text-slate-600 dark:text-slate-300 hover:text-blue-900 dark:hover:text-blue-400 hover:bg-slate-100/60 dark:hover:bg-slate-800/60"
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </div>
 
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">

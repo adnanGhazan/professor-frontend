@@ -1,66 +1,139 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { Section } from "../ui/section";
 import { SectionHeading } from "../ui/section-heading";
 import { Badge } from "../ui/badge";
+import { Spinner } from "../ui/spinner";
+import { SkillService } from "@/src/services/skill.service";
+import { SkillCategory as CmsSkillCategory } from "@/src/types/skill";
 
-export interface SkillCategory {
+export interface SkillCategoryDisplay {
+  id?: number;
   title: string;
   skills: string[];
-  color: string;
 }
 
 export interface SkillsExpertiseProps {
-  categories?: SkillCategory[];
+  initialCategories?: SkillCategoryDisplay[];
   className?: string;
 }
 
+const DEFAULT_CATEGORIES: SkillCategoryDisplay[] = [
+  {
+    title: "Core Research Domains",
+    skills: [
+      "Deep Learning & Foundation Models",
+      "Automated Neural Verification",
+      "Computer Vision & 3D Spatial AI",
+      "Natural Language Processing (LLMs)",
+      "Privacy-Preserving Machine Learning",
+      "Reinforcement Learning & Robotics",
+      "Explainable AI (XAI) & Governance",
+      "Graph Neural Networks (GNNs)",
+    ],
+  },
+  {
+    title: "Tools, Frameworks & Languages",
+    skills: [
+      "PyTorch & PyTorch Geometric",
+      "TensorFlow & JAX",
+      "C++ / CUDA Acceleration",
+      "Python / Scientific Computing",
+      "Z3 SMT Solver & Formal Verifiers",
+      "ROS 2 & Robotics Middleware",
+      "Docker & Kubernetes Clusters",
+      "Git & CI/CD Pipelines",
+    ],
+  },
+  {
+    title: "Academic Leadership & Service",
+    skills: [
+      "NSF & DARPA Grant Writing",
+      "Doctoral Thesis Supervision",
+      "Journal & Conference Editing",
+      "Curriculum & Course Design",
+      "Conference Program Chairing",
+      "University Faculty Governance",
+      "Ethical AI Advisory Boards",
+      "Peer Reviewing (TPAMI/NeurIPS/CVPR)",
+    ],
+  },
+];
+
 export const SkillsExpertise: React.FC<SkillsExpertiseProps> = ({
-  categories = [
-    {
-      title: "Core Research Domains",
-      color: "blue",
-      skills: [
-        "Deep Learning & Foundation Models",
-        "Automated Neural Verification",
-        "Computer Vision & 3D Spatial AI",
-        "Natural Language Processing (LLMs)",
-        "Privacy-Preserving Machine Learning",
-        "Reinforcement Learning & Robotics",
-        "Explainable AI (XAI) & Governance",
-        "Graph Neural Networks (GNNs)",
-      ],
-    },
-    {
-      title: "Tools, Frameworks & Languages",
-      color: "amber",
-      skills: [
-        "PyTorch & PyTorch Geometric",
-        "TensorFlow & JAX",
-        "C++ / CUDA Acceleration",
-        "Python / Scientific Computing",
-        "Z3 SMT Solver & Formal Verifiers",
-        "ROS 2 & Robotics Middleware",
-        "Docker & Kubernetes Clusters",
-        "Git & CI/CD Pipelines",
-      ],
-    },
-    {
-      title: "Academic Leadership & Service",
-      color: "emerald",
-      skills: [
-        "NSF & DARPA Grant Writing",
-        "Doctoral Thesis Supervision",
-        "Journal & Conference Editing",
-        "Curriculum & Course Design",
-        "Conference Program Chairing",
-        "University Faculty Governance",
-        "Ethical AI Advisory Boards",
-        "Peer Reviewing (TPAMI/NeurIPS/CVPR)",
-      ],
-    },
-  ],
+  initialCategories,
   className = "",
 }) => {
+  const [categories, setCategories] = useState<SkillCategoryDisplay[]>(
+    initialCategories || []
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(!initialCategories);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadSkillsData() {
+      try {
+        const fetchedCategories: CmsSkillCategory[] = await SkillService.getPublicSkillCategories();
+
+        if (!isMounted) return;
+
+        if (fetchedCategories && fetchedCategories.length > 0) {
+          const formatted: SkillCategoryDisplay[] = fetchedCategories
+            .filter((cat) => cat.is_visible !== false)
+            .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+            .map((cat) => {
+              const visibleItems = (cat.skill_items || [])
+                .filter((item) => item.is_visible !== false)
+                .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+                .map((item) => item.title);
+
+              return {
+                id: cat.id,
+                title: cat.title,
+                skills: visibleItems,
+              };
+            });
+
+          setCategories(formatted);
+        } else if (!initialCategories) {
+          setCategories(DEFAULT_CATEGORIES);
+        }
+      } catch (error) {
+        console.error("Failed to load skill categories:", error);
+        if (!initialCategories) {
+          setCategories(DEFAULT_CATEGORIES);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    if (!initialCategories) {
+      loadSkillsData();
+    }
+  }, [initialCategories]);
+
+  if (isLoading) {
+    return (
+      <Section variant="default" padding="lg" className={`relative overflow-hidden ${className}`}>
+        <div className="flex flex-col items-center justify-center py-16 space-y-4">
+          <Spinner size="lg" variant="primary" />
+          <p className="text-xs text-slate-500 font-mono animate-pulse">
+            Loading skills & expertise...
+          </p>
+        </div>
+      </Section>
+    );
+  }
+
+  if (categories.length === 0) {
+    return null;
+  }
+
   return (
     <Section variant="default" padding="lg" className={`relative overflow-hidden ${className}`}>
       <div className="space-y-12">
@@ -74,7 +147,7 @@ export const SkillsExpertise: React.FC<SkillsExpertiseProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {categories.map((cat) => (
             <div
-              key={cat.title}
+              key={cat.id || cat.title}
               className="p-6 sm:p-8 rounded-3xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4"
             >
               <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800/80 pb-3">

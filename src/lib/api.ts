@@ -25,7 +25,9 @@ export async function fetcher<T>(url: string, options: FetchOptions = {}): Promi
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: response.statusText }));
-    throw new Error(error.message || `Request failed with status ${response.status}`);
+    const err: any = new Error(error.message || `Request failed with status ${response.status}`);
+    err.response = error;
+    throw err;
   }
 
   return response.json();

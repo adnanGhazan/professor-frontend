@@ -1,21 +1,13 @@
 "use client";
-import React, { useState } from "react";
+
+import React, { useEffect, useState, useCallback } from "react";
+import { Student } from "@/src/types/student";
+import { StudentService } from "@/src/services/student.service";
 import { Section } from "../ui/section";
 import { SectionHeading } from "../ui/section-heading";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
-
-export interface StudentItem {
-  id: string;
-  name: string;
-  degree: string;
-  category: "PhD" | "MS" | "BS";
-  topic: string;
-  status: "Current" | "Graduated";
-  graduationYear: string;
-  coSupervisor?: string;
-  avatarPlaceholder?: string;
-}
+import { Button } from "../ui/button";
 
 export interface SupervisionStatItem {
   label: string;
@@ -25,102 +17,79 @@ export interface SupervisionStatItem {
 }
 
 export interface StudentsSupervisionProps {
-  students?: StudentItem[];
   stats?: SupervisionStatItem[];
   className?: string;
 }
 
 export const StudentsSupervision: React.FC<StudentsSupervisionProps> = ({
-  students = [
-    // PhD Category
-    {
-      id: "phd-1",
-      name: "David K. Miller",
-      degree: "Ph.D. in Computer Science",
-      category: "PhD",
-      topic: "Verification & Safety Guarantees for Autonomous Deep Learning Systems",
-      status: "Current",
-      graduationYear: "2025 (Expected)",
-      coSupervisor: "Dr. Elena Vance (MIT)",
-    },
-    {
-      id: "phd-2",
-      name: "Sophia L. Chen",
-      degree: "Ph.D. in Artificial Intelligence",
-      category: "PhD",
-      topic: "Multimodal Large Language Models for Clinical Reasoning & Diagnosis",
-      status: "Graduated",
-      graduationYear: "2023",
-      coSupervisor: "Prof. Robert Thorne",
-    },
-    {
-      id: "phd-3",
-      name: "Marcus A. Wright",
-      degree: "Ph.D. in Computer Science",
-      category: "PhD",
-      topic: "Privacy-Preserving Federated Learning in Heterogeneous Networks",
-      status: "Current",
-      graduationYear: "2026 (Expected)",
-      coSupervisor: "Dr. James Ross (Stanford)",
-    },
+  stats: statsProp,
+  className = "",
+}) => {
+  const [students, setStudents] = useState<Student[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [failedImageIds, setFailedImageIds] = useState<Record<string | number, boolean>>({});
+  const [activeTab, setActiveTab] = useState<"ALL" | "phd" | "ms" | "bs">("ALL");
 
-    // MS Category
-    {
-      id: "ms-1",
-      name: "Emily R. Watson",
-      degree: "M.S. in Computer Science",
-      category: "MS",
-      topic: "Neural Network Quantization for Ultra-Low-Power Edge IoT Accelerators",
-      status: "Graduated",
-      graduationYear: "2024",
-      coSupervisor: "Alan Turing Research Lab",
-    },
-    {
-      id: "ms-2",
-      name: "Tariq H. Al-Mansoor",
-      degree: "M.S. in Artificial Intelligence",
-      category: "MS",
-      topic: "Graph Neural Networks for Zero-Day Vulnerability Detection in Smart Contracts",
-      status: "Current",
-      graduationYear: "2025 (Expected)",
-      coSupervisor: "None",
-    },
-    {
-      id: "ms-3",
-      name: "Hannah M. Taylor",
-      degree: "M.S. in Data Science",
-      category: "MS",
-      topic: "Explainable AI Frameworks for Automated Financial Fraud Detection",
-      status: "Graduated",
-      graduationYear: "2023",
-      coSupervisor: "Dr. Sarah Gupta",
-    },
+  // Fetch Public Students
+  const fetchStudents = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await StudentService.getPublicStudents();
+      setStudents(data);
+      setFailedImageIds({});
+    } catch (err: unknown) {
+      console.error("Failed to load public student records:", err);
+      setError("Unable to load student supervision records at this time.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-    // BS Category
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
+
+  // Helper to determine category from degree text
+  const getStudentCategory = (degreeStr?: string | null): "phd" | "ms" | "bs" | "other" => {
+    if (!degreeStr) return "other";
+    const d = degreeStr.toUpperCase();
+    if (d.includes("PHD") || d.includes("DOCTOR") || d.includes("DPHIL")) return "phd";
+    if (d.includes("MS") || d.includes("MPHIL") || d.includes("MASTER")) return "ms";
+    if (d.includes("BS") || d.includes("BACHELOR") || d.includes("FINAL YEAR PROJECT")) return "bs";
+    return "other";
+  };
+
+  // Helper to check if a student has completed/graduated status
+  const isCompletedStudent = (s: Student) => {
+    const st = s.status ? String(s.status).toLowerCase().trim() : "";
+    return (
+      st === "completed" ||
+      st === "graduated" ||
+      st === "alumni" ||
+      st === "alumnus" ||
+      st === "passed" ||
+      st === "former" ||
+      (st !== "current" && st !== "active" && st !== "ongoing" && (s.completion_year != null || st !== ""))
+    );
+  };
+
+  // Helper to check if a student has current/active status
+  const isCurrentStudent = (s: Student) => {
+    const st = s.status ? String(s.status).toLowerCase().trim() : "";
+    return st === "current" || st === "active" || st === "ongoing" || (!st && s.completion_year == null);
+  };
+
+  // Dynamic Supervision Overview & Impact Counts from API Records
+  const phdCount = students.filter((s) => getStudentCategory(s.degree) === "phd" && isCompletedStudent(s)).length;
+  const msCount = students.filter((s) => getStudentCategory(s.degree) === "ms" && isCompletedStudent(s)).length;
+  const bsCount = students.filter((s) => getStudentCategory(s.degree) === "bs" && isCompletedStudent(s)).length;
+  const currentResearchersCount = students.filter((s) => isCurrentStudent(s)).length;
+
+  const defaultStats: SupervisionStatItem[] = [
     {
-      id: "bs-1",
-      name: "Liam O'Connor & Maya Patel",
-      degree: "B.S. in Computer Science (Capstone)",
-      category: "BS",
-      topic: "Real-Time Autonomous Drone Navigation using Lightweight Vision Transformers",
-      status: "Graduated",
-      graduationYear: "2024",
-      coSupervisor: "None",
-    },
-    {
-      id: "bs-2",
-      name: "Alexander J. Kim",
-      degree: "B.S. in Computer Engineering",
-      category: "BS",
-      topic: "Hardware Acceleration for Sparse Matrix Multiplication on FPGAs",
-      status: "Current",
-      graduationYear: "2025 (Expected)",
-      coSupervisor: "Dr. Michael Scott",
-    },
-  ],
-  stats = [
-    {
-      value: "14",
+      value: String(phdCount),
       label: "PhD Supervised",
       description: "Doctoral scholars mentored & dissertations chaired",
       icon: (
@@ -131,7 +100,7 @@ export const StudentsSupervision: React.FC<StudentsSupervisionProps> = ({
       ),
     },
     {
-      value: "28",
+      value: String(msCount),
       label: "MS Supervised",
       description: "Master's thesis graduates mentored in AI research",
       icon: (
@@ -141,7 +110,7 @@ export const StudentsSupervision: React.FC<StudentsSupervisionProps> = ({
       ),
     },
     {
-      value: "40+",
+      value: String(bsCount),
       label: "BS Projects",
       description: "Undergraduate senior capstone research projects",
       icon: (
@@ -151,7 +120,7 @@ export const StudentsSupervision: React.FC<StudentsSupervisionProps> = ({
       ),
     },
     {
-      value: "12",
+      value: String(currentResearchersCount),
       label: "Current Researchers",
       description: "Active doctoral, master's & undergraduate researchers",
       icon: (
@@ -160,20 +129,46 @@ export const StudentsSupervision: React.FC<StudentsSupervisionProps> = ({
         </svg>
       ),
     },
-  ],
-  className = "",
-}) => {
-  const [activeTab, setActiveTab] = useState<"ALL" | "PhD" | "MS" | "BS">("ALL");
+  ];
 
-  const filteredStudents =
-    activeTab === "ALL" ? students : students.filter((s) => s.category === activeTab);
+  const overviewStats = statsProp || defaultStats;
 
+  // Extract initials for fallback avatar
+  const getInitials = (name?: string | null) => {
+    if (!name) return "ST";
+    const parts = name.trim().split(" ");
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.slice(0, 2).toUpperCase();
+  };
+
+  // Format Timeline string
+  const formatTimeline = (student: Student) => {
+    const isCurrent = student.status === "current";
+    if (isCurrent) {
+      return student.start_year ? `${student.start_year} — Present` : "Present";
+    }
+    if (student.start_year && student.completion_year) {
+      return `${student.start_year} — ${student.completion_year}`;
+    }
+    return student.completion_year ? String(student.completion_year) : "Graduated";
+  };
+
+  // Dynamic Tab Counts from API Records
   const categories = [
     { key: "ALL", label: "All Researchers", count: students.length },
-    { key: "PhD", label: "PhD Students", count: students.filter((s) => s.category === "PhD").length },
-    { key: "MS", label: "MS Students", count: students.filter((s) => s.category === "MS").length },
-    { key: "BS", label: "BS Final Year Projects", count: students.filter((s) => s.category === "BS").length },
+    { key: "phd", label: "PhD Students", count: students.filter((s) => getStudentCategory(s.degree) === "phd").length },
+    { key: "ms", label: "MS Students", count: students.filter((s) => getStudentCategory(s.degree) === "ms").length },
+    { key: "bs", label: "BS Final Year Projects", count: students.filter((s) => getStudentCategory(s.degree) === "bs").length },
   ];
+
+  // Filter students based on active tab and limit to first 6 visible
+  const filteredStudents = (
+    activeTab === "ALL"
+      ? students
+      : students.filter((s) => getStudentCategory(s.degree) === activeTab)
+  ).slice(0, 6);
 
   return (
     <Section variant="default" padding="lg" className={`relative overflow-hidden ${className}`}>
@@ -187,7 +182,7 @@ export const StudentsSupervision: React.FC<StudentsSupervisionProps> = ({
         aria-hidden="true"
       />
 
-      <div className="relative z-10 space-y-16">
+      <div className="relative z-10 space-y-16 max-w-7xl mx-auto">
         {/* Section Heading */}
         <SectionHeading
           eyebrow="Research Lab & Mentorship"
@@ -197,118 +192,194 @@ export const StudentsSupervision: React.FC<StudentsSupervisionProps> = ({
         />
 
         {/* Category Filter Tabs */}
-        <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl mx-auto">
-          {categories.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key as any)}
-              className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-900 ${activeTab === tab.key
-                  ? "bg-blue-900 text-white dark:bg-blue-600 shadow-md scale-105"
-                  : "bg-white/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
+        {!isLoading && !error && students.length > 0 && (
+          <div className="flex flex-wrap items-center justify-center gap-2 max-w-2xl mx-auto">
+            {categories.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as any)}
+                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-900 ${
+                  activeTab === tab.key
+                    ? "bg-blue-900 text-white dark:bg-blue-600 shadow-md scale-105"
+                    : "bg-white/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
                 }`}
-            >
-              <span>{tab.label}</span>
-              <span
-                className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${activeTab === tab.key
-                    ? "bg-white/20 text-white"
-                    : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                  }`}
               >
-                {tab.count}
-              </span>
-            </button>
-          ))}
-        </div>
+                <span>{tab.label}</span>
+                <span
+                  className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${
+                    activeTab === tab.key
+                      ? "bg-white/20 text-white"
+                      : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Loading Skeletons */}
+        {isLoading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="bg-white/40 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4 animate-pulse"
+              >
+                <div className="flex justify-between items-center">
+                  <div className="h-5 bg-slate-300 dark:bg-slate-800 rounded w-24" />
+                  <div className="h-5 bg-slate-300 dark:bg-slate-800 rounded w-16" />
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-slate-300 dark:bg-slate-800 shrink-0" />
+                  <div className="space-y-2 flex-1">
+                    <div className="h-5 bg-slate-300 dark:bg-slate-800 rounded w-3/4" />
+                    <div className="h-3 bg-slate-300 dark:bg-slate-800 rounded w-1/2" />
+                  </div>
+                </div>
+                <div className="h-4 bg-slate-300 dark:bg-slate-800 rounded w-full" />
+                <div className="h-4 bg-slate-300 dark:bg-slate-800 rounded w-2/3" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Error State with Retry Button */}
+        {!isLoading && error && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-3xl p-8 text-center max-w-xl mx-auto space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-red-500/20 text-red-400 flex items-center justify-center mx-auto text-xl font-bold">
+              ⚠️
+            </div>
+            <p className="text-sm font-medium text-red-400">{error}</p>
+            <Button variant="outline" size="sm" onClick={fetchStudents} className="border-red-500/30 text-red-400 hover:bg-red-500/10">
+              Retry Loading
+            </Button>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && !error && filteredStudents.length === 0 && (
+          <div className="bg-white/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center max-w-xl mx-auto space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-slate-800 text-slate-400 flex items-center justify-center mx-auto text-xl font-bold">
+              🎓
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">No Student Records Found</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {activeTab !== "ALL"
+                ? "No student supervision records match this selected category."
+                : "Student supervision records will be updated soon."}
+            </p>
+          </div>
+        )}
 
         {/* Responsive Grid of Student Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredStudents.map((student) => (
-            <Card
-              key={student.id}
-              variant="default"
-              hover
-              className="group relative flex flex-col justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:border-blue-400 dark:hover:border-blue-600"
-            >
-              <div>
-                {/* Header: Degree Tag & Status Badge */}
-                <div className="flex items-center justify-between gap-2 mb-4">
-                  <Badge
-                    variant={
-                      student.category === "PhD"
-                        ? "accent"
-                        : student.category === "MS"
-                          ? "primary"
-                          : "secondary"
-                    }
-                    size="sm"
-                    className="font-semibold"
-                  >
-                    {student.category} Candidate
-                  </Badge>
+        {!isLoading && !error && filteredStudents.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredStudents.map((student) => {
+              const cat = getStudentCategory(student.degree);
+              const isCurrent = student.status === "current";
 
-                  <Badge
-                    variant={student.status === "Current" ? "success" : "outline"}
-                    size="sm"
-                    className="font-medium text-[11px]"
-                    icon={
-                      student.status === "Current" ? (
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      ) : undefined
-                    }
-                  >
-                    {student.status}
-                  </Badge>
-                </div>
-
-                {/* Student Name & Degree */}
-                <CardHeader className="p-0 pb-3">
-                  <div className="flex items-center gap-3 mb-1">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-900 to-slate-800 dark:from-blue-600 dark:to-slate-700 flex items-center justify-center text-white font-bold text-sm shadow-xs shrink-0">
-                      {student.name.charAt(0)}
-                    </div>
-                    <div>
-                      <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors font-sans leading-snug">
-                        {student.name}
-                      </CardTitle>
-                      <span className="text-xs font-semibold text-blue-900 dark:text-blue-400">
+              return (
+                <Card
+                  key={student.id}
+                  variant="default"
+                  hover
+                  className="group relative flex flex-col justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:border-blue-400 dark:hover:border-blue-600"
+                >
+                  <div>
+                    {/* Header: Degree Tag & Status Badge */}
+                    <div className="flex items-center justify-between gap-2 mb-4">
+                      <Badge
+                        variant={
+                          cat === "phd"
+                            ? "accent"
+                            : cat === "ms"
+                            ? "primary"
+                            : "secondary"
+                        }
+                        size="sm"
+                        className="font-semibold"
+                      >
                         {student.degree}
+                      </Badge>
+
+                      <Badge
+                        variant={isCurrent ? "success" : "outline"}
+                        size="sm"
+                        className="font-medium text-[11px]"
+                        icon={
+                          isCurrent ? (
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          ) : undefined
+                        }
+                      >
+                        {isCurrent ? "Current" : "Graduated"}
+                      </Badge>
+                    </div>
+
+                    {/* Student Avatar & Name */}
+                    <CardHeader className="p-0 pb-3">
+                      <div className="flex items-center gap-3 mb-1">
+                        {/* Circular Image / Avatar with Initials Fallback */}
+                        <div className="relative w-11 h-11 rounded-full bg-gradient-to-br from-blue-900 to-slate-800 dark:from-blue-600 dark:to-slate-700 overflow-hidden border border-slate-300 dark:border-slate-700 flex items-center justify-center text-white font-bold text-xs shadow-xs shrink-0">
+                          {student.photo_url && !failedImageIds[student.id] ? (
+                            <img
+                              src={student.photo_url}
+                              alt={student.student_name}
+                              className="h-full w-full object-cover"
+                              onError={() => setFailedImageIds((prev) => ({ ...prev, [student.id]: true }))}
+                            />
+                          ) : (
+                            <span>{getInitials(student.student_name)}</span>
+                          )}
+                        </div>
+
+                        <div className="truncate">
+                          <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors font-sans leading-snug truncate">
+                            {student.student_name}
+                          </CardTitle>
+                          {student.institution && (
+                            <span className="text-xs font-semibold text-blue-900 dark:text-blue-400 block truncate">
+                              {student.institution}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </CardHeader>
+
+                    {/* Research Topic / Title */}
+                    <CardContent className="p-0 pt-2 space-y-2">
+                      <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        Research Focus
+                      </span>
+                      <CardDescription className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium italic line-clamp-3">
+                        &ldquo;{student.research_title || student.description || "Research topic details will be added soon."}&rdquo;
+                      </CardDescription>
+                    </CardContent>
+                  </div>
+
+                  {/* Card Footer: Timeline & Status */}
+                  <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/60 space-y-2 text-xs text-slate-500 dark:text-slate-400">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">Timeline:</span>
+                      <span className="font-mono bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                        {formatTimeline(student)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-slate-400">Status:</span>
+                      <span className="font-medium text-slate-600 dark:text-slate-300 truncate max-w-[170px]">
+                        {isCurrent ? "● Active Researcher" : "✓ Graduated Alumni"}
                       </span>
                     </div>
                   </div>
-                </CardHeader>
-
-                {/* Research Topic */}
-                <CardContent className="p-0 pt-2 space-y-2">
-                  <span className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                    Research Topic
-                  </span>
-                  <CardDescription className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-medium italic">
-                    &ldquo;{student.topic}&rdquo;
-                  </CardDescription>
-                </CardContent>
-              </div>
-
-              {/* Card Footer: Graduation Year & Co-supervisor */}
-              <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/60 space-y-2 text-xs text-slate-500 dark:text-slate-400">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">Graduation:</span>
-                  <span className="font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-[11px]">
-                    {student.graduationYear}
-                  </span>
-                </div>
-
-                {student.coSupervisor && (
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-slate-400">Co-supervisor:</span>
-                    <span className="font-medium text-slate-600 dark:text-slate-300 truncate max-w-[170px]" title={student.coSupervisor}>
-                      {student.coSupervisor}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </Card>
-          ))}
-        </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
         {/* Supervision Statistics Section Below Cards */}
         <div className="pt-10 border-t border-slate-200/80 dark:border-slate-800/80 space-y-8">
@@ -322,7 +393,7 @@ export const StudentsSupervision: React.FC<StudentsSupervisionProps> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat) => (
+            {overviewStats.map((stat) => (
               <div
                 key={stat.label}
                 className="group relative p-6 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-blue-400 dark:hover:border-blue-600 transition-all duration-300 hover:-translate-y-1.5"

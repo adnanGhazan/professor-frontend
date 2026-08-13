@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
 import { ResearchArea } from "@/src/types/research-area";
 import { ResearchAreaService } from "@/src/services/research-area.service";
 import { Section } from "@/src/components/ui/section";
@@ -149,6 +150,8 @@ export default function ResearchPage() {
                   ? area.short_description
                   : "Research details will be added soon.";
 
+                const targetSlug = area.slug || area.id;
+
                 return (
                   <Card
                     key={area.id}
@@ -207,27 +210,39 @@ export default function ResearchPage() {
                         </CardTitle>
                       </CardHeader>
 
-                      {/* Short Description */}
+                      {/* Short Description Only */}
                       <CardContent className="p-0 space-y-3">
-                        <CardDescription className="text-sm text-slate-300 leading-relaxed font-medium">
+                        <CardDescription className="text-sm text-slate-300 leading-relaxed font-medium line-clamp-3">
                           {shortDesc}
                         </CardDescription>
-
-                        {/* Detailed Description */}
-                        {area.description && area.description.trim().length > 0 && (
-                          <div className="pt-3 border-t border-slate-800/80">
-                            <p className="text-xs text-slate-400 leading-relaxed font-normal whitespace-pre-line">
-                              {area.description}
-                            </p>
-                          </div>
-                        )}
                       </CardContent>
                     </div>
 
-                    {/* Footer Meta Badge / Sort Badge */}
-                    <div className="mt-8 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500 font-mono">
-                      <span>Research Area #{area.sort_order ?? 1}</span>
-                      <span className="text-amber-400/80 font-medium">Active Domain</span>
+                    {/* Footer View Details Button */}
+                    <div className="mt-8 pt-4 border-t border-slate-800/80 flex items-center justify-between">
+                      <span className="text-xs text-slate-500 font-mono">
+                        Area #{area.sort_order ?? 1}
+                      </span>
+                      <Link href={`/research/${targetSlug}`}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-blue-500/40 text-blue-400 hover:bg-blue-500/20 font-semibold cursor-pointer"
+                          rightIcon={
+                            <svg
+                              className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              strokeWidth="2"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                            </svg>
+                          }
+                        >
+                          View Details
+                        </Button>
+                      </Link>
                     </div>
                   </Card>
                 );
@@ -239,3 +254,4 @@ export default function ResearchPage() {
     </div>
   );
 }
+

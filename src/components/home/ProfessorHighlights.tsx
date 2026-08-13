@@ -1,8 +1,14 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { Section } from "../ui/section";
 import { SectionHeading } from "../ui/section-heading";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
+import { ExperienceService } from "@/src/services/experience.service";
+import { ResearchProjectService } from "@/src/services/research-project.service";
+import { StudentService } from "@/src/services/student.service";
+import { AwardService } from "@/src/services/award.service";
 
 export interface ResearchInterestItem {
   title: string;
@@ -10,7 +16,7 @@ export interface ResearchInterestItem {
   icon: React.ReactNode;
 }
 
-export interface AcademicProfileItem {
+export interface HighlightProfileItem {
   name: string;
   description: string;
   url: string;
@@ -32,6 +38,122 @@ export interface ProfessorHighlightsProps {
 export const ProfessorHighlights: React.FC<ProfessorHighlightsProps> = ({
   className = "",
 }) => {
+  const [metrics, setMetrics] = useState({
+    experienceYears: 15,
+    researchProjectsCount: 30,
+    graduatedStudentsCount: 0,
+    awardsCount: 12,
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchMetrics = async () => {
+      const [expResult, projectsResult, studentsResult, awardsResult] = await Promise.allSettled([
+        ExperienceService.getExperiences(),
+        ResearchProjectService.getPublicResearchProjects(),
+        StudentService.getPublicStudents(),
+        AwardService.getPublicAwards(),
+      ]);
+
+      let expYears = 15;
+      if (expResult.status === "fulfilled" && Array.isArray(expResult.value) && expResult.value.length > 0) {
+        const currentYear = new Date().getFullYear();
+        const startYears: number[] = [];
+
+        expResult.value.forEach((item: any) => {
+          let year: number | null = null;
+          if (item.start_year != null && item.start_year !== "") {
+            const parsed = parseInt(String(item.start_year).substring(0, 4), 10);
+            if (!isNaN(parsed) && parsed > 1900 && parsed <= currentYear) {
+              year = parsed;
+            }
+          }
+          if (!year && item.start_date != null && item.start_date !== "") {
+            const parsed = parseInt(String(item.start_date).substring(0, 4), 10);
+            if (!isNaN(parsed) && parsed > 1900 && parsed <= currentYear) {
+              year = parsed;
+            }
+          }
+          if (!year && item.period) {
+            const match = String(item.period).match(/\b(19\d{2}|20\d{2})\b/);
+            if (match) {
+              const parsed = parseInt(match[0], 10);
+              if (!isNaN(parsed) && parsed > 1900 && parsed <= currentYear) {
+                year = parsed;
+              }
+            }
+          }
+          if (year) {
+            startYears.push(year);
+          }
+        });
+
+        if (startYears.length > 0) {
+          const minYear = Math.min(...startYears);
+          const total = currentYear - minYear;
+          if (total >= 0) {
+            expYears = total;
+          }
+        }
+      }
+
+      let projCount = 30;
+      if (projectsResult.status === "fulfilled" && Array.isArray(projectsResult.value)) {
+        projCount = projectsResult.value.length;
+      }
+
+      let gradCount = 0;
+      if (studentsResult.status === "fulfilled" && studentsResult.value) {
+        let studentList: any[] = [];
+        if (Array.isArray(studentsResult.value)) {
+          studentList = studentsResult.value;
+        } else if (typeof studentsResult.value === "object" && Array.isArray((studentsResult.value as any).items)) {
+          studentList = (studentsResult.value as any).items;
+        } else if (typeof studentsResult.value === "object" && Array.isArray((studentsResult.value as any).data)) {
+          studentList = (studentsResult.value as any).data;
+        }
+
+        gradCount = studentList.filter((s) => {
+          const status = s?.status ? String(s.status).toLowerCase().trim() : "";
+          const isCompletedStatus =
+            status === "completed" ||
+            status === "graduated" ||
+            status === "alumni" ||
+            status === "alumnus" ||
+            status === "passed" ||
+            status === "former";
+
+          const isNotCurrent = status !== "current" && status !== "active" && status !== "ongoing";
+          const hasCompletionYear = s?.completion_year != null && Number(s.completion_year) > 0;
+          const isGradFlag = Boolean(s?.is_graduated || s?.is_completed);
+
+          return isCompletedStatus || isGradFlag || (isNotCurrent && (hasCompletionYear || status !== ""));
+        }).length;
+      }
+
+      let awardCount = 12;
+      if (awardsResult.status === "fulfilled" && Array.isArray(awardsResult.value)) {
+        awardCount = awardsResult.value.length;
+      }
+
+      if (isMounted) {
+        setMetrics({
+          experienceYears: expYears,
+          researchProjectsCount: projCount,
+          graduatedStudentsCount: gradCount,
+          awardsCount: awardCount,
+        });
+      }
+    };
+
+    fetchMetrics();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // SECTION 1: Research Interests Data (6 requested domains)
   const researchInterests: ResearchInterestItem[] = [
     {
@@ -98,7 +220,7 @@ export const ProfessorHighlights: React.FC<ProfessorHighlightsProps> = ({
   ];
 
   // SECTION 2: Academic Profiles Data (5 requested platforms)
-  const academicProfiles: AcademicProfileItem[] = [
+  const academicProfiles: HighlightProfileItem[] = [
     {
       name: "Google Scholar",
       description:
@@ -165,7 +287,7 @@ export const ProfessorHighlights: React.FC<ProfessorHighlightsProps> = ({
   const quickFacts: QuickFactItem[] = [
     {
       title: "Experience",
-      value: "15+ Years",
+      value: `${metrics.experienceYears}+ Years`,
       description: "Academic research leadership and university faculty tenure",
       icon: (
         <svg className="w-6 h-6 text-blue-600 dark:text-blue-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
@@ -175,7 +297,7 @@ export const ProfessorHighlights: React.FC<ProfessorHighlightsProps> = ({
     },
     {
       title: "Research Projects",
-      value: "30+ Projects",
+      value: `${metrics.researchProjectsCount}+ Projects`,
       description: "Funded grants by NSF, IEEE, and leading industrial sponsors",
       icon: (
         <svg className="w-6 h-6 text-amber-600 dark:text-amber-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
@@ -185,7 +307,7 @@ export const ProfessorHighlights: React.FC<ProfessorHighlightsProps> = ({
     },
     {
       title: "Graduated Students",
-      value: "25+ Scholars",
+      value: metrics.graduatedStudentsCount === 1 ? "1 Scholar" : `${metrics.graduatedStudentsCount} Scholars`,
       description: "Mentored Ph.D. alumni and Master's thesis researchers",
       icon: (
         <svg className="w-6 h-6 text-emerald-600 dark:text-emerald-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
@@ -195,7 +317,7 @@ export const ProfessorHighlights: React.FC<ProfessorHighlightsProps> = ({
     },
     {
       title: "Awards",
-      value: "12 Honors",
+      value: `${metrics.awardsCount} Honors`,
       description: "Prestigious national & international scientific achievements",
       icon: (
         <svg className="w-6 h-6 text-rose-600 dark:text-rose-400 fill-none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">

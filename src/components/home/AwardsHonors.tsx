@@ -1,18 +1,16 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
+import { Award } from "@/src/types/award";
+import { AwardService } from "@/src/services/award.service";
+import { ResearchProject } from "@/src/types/research-project";
+import { ResearchProjectService } from "@/src/services/research-project.service";
 import { Section } from "../ui/section";
 import { SectionHeading } from "../ui/section-heading";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
-
-export interface AwardItem {
-  id: string;
-  name: string;
-  organization: string;
-  year: string;
-  category: string;
-  description: string;
-  isFeatured?: boolean;
-}
+import { Button } from "../ui/button";
 
 export interface AchievementStatItem {
   label: string;
@@ -22,100 +20,101 @@ export interface AchievementStatItem {
 }
 
 export interface AwardsHonorsProps {
-  featuredAward?: AwardItem;
-  awards?: AwardItem[];
   stats?: AchievementStatItem[];
   className?: string;
 }
 
 export const AwardsHonors: React.FC<AwardsHonorsProps> = ({
-  featuredAward = {
-    id: "featured-1",
-    name: "IEEE Fellow Designation for Contributions to Trustworthy AI & Neural Verification",
-    organization: "Institute of Electrical and Electronics Engineers (IEEE)",
-    year: "2024",
-    category: "Lifetime International Honor",
-    description:
-      "Conferred for pioneering scientific contributions to the formal verification of deep neural networks, model interpretability, and leadership in ethical artificial intelligence research.",
-    isFeatured: true,
-  },
-  awards = [
+  stats: statsProp,
+  className = "",
+}) => {
+  const [awards, setAwards] = useState<Award[]>([]);
+  const [projects, setProjects] = useState<ResearchProject[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [failedImageIds, setFailedImageIds] = useState<Record<string | number, boolean>>({});
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [awardsData, projectsData] = await Promise.all([
+        AwardService.getPublicAwards().catch(() => []),
+        ResearchProjectService.getPublicResearchProjects().catch(() => []),
+      ]);
+      setAwards(awardsData);
+      setProjects(projectsData);
+    } catch (err: unknown) {
+      console.error("Failed to load awards/projects:", err);
+      setError("Unable to load awards and honors at this time.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Display top 6 awards
+  const displayedAwards = awards.slice(0, 6);
+
+  // Dynamic Achievement Statistics Calculations
+  const totalAwardsCount = awards.length;
+
+  const internationalAwardsCount = awards.filter((a: any) => {
+    const scope = String(a.scope || a.category || a.type || a.level || "").toLowerCase().trim();
+    if (scope === "international" || scope === "global" || scope === "world") return true;
+    const body = String(a.awarding_body || a.organization || "").toLowerCase();
+    const title = String(a.title || "").toLowerCase();
+    const desc = String(a.description || "").toLowerCase();
+    return (
+      body.includes("international") ||
+      body.includes("ieee") ||
+      body.includes("acm") ||
+      body.includes("springer") ||
+      body.includes("global") ||
+      title.includes("international") ||
+      desc.includes("international")
+    );
+  }).length;
+
+  const nationalAwardsCount = awards.filter((a: any) => {
+    const scope = String(a.scope || a.category || a.type || a.level || "").toLowerCase().trim();
+    if (scope === "national" || scope === "country" || scope === "state") return true;
+    const body = String(a.awarding_body || a.organization || "").toLowerCase();
+    const title = String(a.title || "").toLowerCase();
+    const desc = String(a.description || "").toLowerCase();
+    const isIntl =
+      scope === "international" ||
+      body.includes("international") ||
+      title.includes("international") ||
+      desc.includes("international");
+    if (isIntl) return false;
+    return (
+      body.includes("national") ||
+      body.includes("presidential") ||
+      body.includes("hec") ||
+      title.includes("national") ||
+      desc.includes("national") ||
+      !isIntl
+    );
+  }).length;
+
+  const grantsCount = projects.filter((p: any) => {
+    const funding = String(p.funding_source || "").trim().toLowerCase();
+    const status = String(p.status || "").trim().toLowerCase();
+    const type = String(p.type || p.category || "").trim().toLowerCase();
+    const title = String(p.title || "").trim().toLowerCase();
+    if (funding.length > 0 && funding !== "none" && funding !== "n/a") return true;
+    if (status.includes("grant") || status.includes("fund") || type.includes("grant") || type.includes("fund")) return true;
+    if (title.includes("grant") || title.includes("fund")) return true;
+    return Boolean(p.funding_source || p.status || p.title);
+  }).length;
+
+  const defaultStats: AchievementStatItem[] = [
     {
-      id: "award-1",
-      name: "ACM Distinguished Scientist Award",
-      organization: "Association for Computing Machinery (ACM)",
-      year: "2023",
-      category: "Research Excellence",
-      description:
-        "Recognizing significant impact and sustained scientific contributions to computer science and artificial intelligence.",
-    },
-    {
-      id: "award-2",
-      name: "NSF CAREER Award",
-      organization: "National Science Foundation",
-      year: "2021",
-      category: "National Research Honor",
-      description:
-        "Prestigious early-career faculty award supporting foundational research on privacy-preserving machine learning.",
-    },
-    {
-      id: "award-3",
-      name: "Best Paper Award (CVPR 2023)",
-      organization: "IEEE/CVF CVPR Conference Committee",
-      year: "2023",
-      category: "Best Paper Award",
-      description:
-        "Awarded for the publication 'Transformer-Based Multimodal Reasoning for Complex 3D Scene Reconstruction'.",
-    },
-    {
-      id: "award-4",
-      name: "Presidential Excellence in University Teaching",
-      organization: "University Academic Senate",
-      year: "2022",
-      category: "Teaching Award",
-      description:
-        "Highest university recognition for innovative computer science pedagogy, curriculum design, and doctoral mentorship.",
-    },
-    {
-      id: "award-5",
-      name: "Google Research Faculty Award",
-      organization: "Google AI Research Office",
-      year: "2022",
-      category: "Industry Research Award",
-      description:
-        "Unrestricted research grant for automated software vulnerability detection using neural Transformer models.",
-    },
-    {
-      id: "award-6",
-      name: "Outstanding Doctoral Dissertation Advisor",
-      organization: "Graduate School of Engineering",
-      year: "2023",
-      category: "Mentorship Award",
-      description:
-        "Recognizing exceptional dedication in supervising and placing doctoral graduates in top academic and research labs.",
-    },
-    {
-      id: "award-7",
-      name: "ACM SIGPLAN Distinguished Paper Award",
-      organization: "ACM PLDI Conference Committee",
-      year: "2023",
-      category: "Best Paper Award",
-      description:
-        "Awarded for groundbreaking work on formal verification of safety-critical autonomous neural controllers.",
-    },
-    {
-      id: "award-8",
-      name: "International AI Leadership Medal",
-      organization: "International AI Association",
-      year: "2020",
-      category: "Service & Leadership",
-      description:
-        "Honoring leadership as Program Chair for international artificial intelligence conferences and policy boards.",
-    },
-  ],
-  stats = [
-    {
-      value: "16",
+      value: String(totalAwardsCount),
       label: "Awards Received",
       description: "Total academic recognitions & honors",
       icon: (
@@ -125,7 +124,7 @@ export const AwardsHonors: React.FC<AwardsHonorsProps> = ({
       ),
     },
     {
-      value: "9",
+      value: String(internationalAwardsCount),
       label: "International Awards",
       description: "Conferred by global scientific societies",
       icon: (
@@ -135,7 +134,7 @@ export const AwardsHonors: React.FC<AwardsHonorsProps> = ({
       ),
     },
     {
-      value: "7",
+      value: String(nationalAwardsCount),
       label: "National Awards",
       description: "National foundation & university honors",
       icon: (
@@ -145,7 +144,7 @@ export const AwardsHonors: React.FC<AwardsHonorsProps> = ({
       ),
     },
     {
-      value: "12",
+      value: String(grantsCount),
       label: "Research Grants",
       description: "Competitive funded research proposals",
       icon: (
@@ -154,9 +153,10 @@ export const AwardsHonors: React.FC<AwardsHonorsProps> = ({
         </svg>
       ),
     },
-  ],
-  className = "",
-}) => {
+  ];
+
+  const achievementStats = statsProp || defaultStats;
+
   return (
     <Section variant="surface" padding="lg" className={`relative overflow-hidden ${className}`}>
       {/* Ambient background decoration */}
@@ -169,7 +169,7 @@ export const AwardsHonors: React.FC<AwardsHonorsProps> = ({
         aria-hidden="true"
       />
 
-      <div className="relative z-10 space-y-16">
+      <div className="relative z-10 space-y-16 max-w-7xl mx-auto">
         {/* Section Heading */}
         <SectionHeading
           eyebrow="Recognitions & Achievements"
@@ -178,102 +178,162 @@ export const AwardsHonors: React.FC<AwardsHonorsProps> = ({
           align="center"
         />
 
-        {/* Featured Top Award Hero Card */}
-        {featuredAward && (
-          <div className="relative rounded-3xl bg-gradient-to-r from-amber-500/10 via-blue-900/10 to-amber-500/10 dark:from-amber-400/15 dark:via-blue-950/40 dark:to-amber-400/15 p-1">
-            <div className="rounded-[23px] bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-amber-300/60 dark:border-amber-700/60 p-8 sm:p-10 shadow-2xl relative overflow-hidden">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                <div className="flex items-start gap-5">
-                  {/* Trophy Emblem */}
-                  <div className="p-4 rounded-2xl bg-amber-500/15 dark:bg-amber-400/20 border border-amber-400/30 shrink-0 text-amber-600 dark:text-amber-400">
-                    <svg className="w-10 h-10 fill-current" viewBox="0 0 24 24">
-                      <path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94A5.01 5.01 0 0011 15.9V18H8v2h8v-2h-3v-2.1c2.16-.4 3.86-2.1 4.39-4.34C19.8 11.23 21 9.25 21 7V6c0-1.1-.9-1-2-1zM5 8V7h2v3.82C5.84 10.4 5 9.3 5 8zm14 0c0 1.3-.84 2.4-2 2.82V7h2v1z" />
-                    </svg>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="accent" size="md" className="font-bold">
-                        ★ {featuredAward.category}
-                      </Badge>
-                      <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/80 px-2.5 py-0.5 rounded-full border border-amber-300 dark:border-amber-800">
-                        {featuredAward.year}
-                      </span>
-                    </div>
-
-                    <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 font-sans tracking-tight leading-tight">
-                      {featuredAward.name}
-                    </h3>
-
-                    <p className="text-xs sm:text-sm font-semibold text-blue-900 dark:text-blue-400">
-                      {featuredAward.organization}
-                    </p>
-
-                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-normal pt-1 max-w-3xl">
-                      {featuredAward.description}
-                    </p>
-                  </div>
+        {/* Loading Skeletons */}
+        {isLoading && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="bg-white/40 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 space-y-4 animate-pulse"
+              >
+                <div className="flex justify-between items-center">
+                  <div className="h-6 w-6 bg-slate-300 dark:bg-slate-800 rounded-full" />
+                  <div className="h-5 bg-slate-300 dark:bg-slate-800 rounded w-16" />
                 </div>
+                <div className="h-6 bg-slate-300 dark:bg-slate-800 rounded w-3/4" />
+                <div className="h-4 bg-slate-300 dark:bg-slate-800 rounded w-1/2" />
+                <div className="h-4 bg-slate-300 dark:bg-slate-800 rounded w-full" />
               </div>
-            </div>
+            ))}
           </div>
         )}
 
-        {/* Grid of 8 Award Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {awards.map((award) => (
-            <Card
-              key={award.id}
-              variant="default"
-              hover
-              className="group relative flex flex-col justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 p-6 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:border-amber-400 dark:hover:border-amber-500"
-            >
-              <div>
-                {/* Header: Year & Category Badge */}
-                <div className="flex items-center justify-between gap-2 mb-4">
-                  <Badge variant="outline" size="sm" className="font-semibold text-[11px]">
-                    {award.category}
-                  </Badge>
+        {/* Error State with Retry Button */}
+        {!isLoading && error && (
+          <div className="bg-red-500/10 border border-red-500/30 rounded-3xl p-8 text-center max-w-xl mx-auto space-y-4">
+            <div className="w-12 h-12 rounded-2xl bg-red-500/20 text-red-400 flex items-center justify-center mx-auto text-xl font-bold">
+              ⚠️
+            </div>
+            <p className="text-sm font-medium text-red-400">{error}</p>
+            <Button variant="outline" size="sm" onClick={fetchData} className="border-red-500/30 text-red-400 hover:bg-red-500/10">
+              Retry Loading
+            </Button>
+          </div>
+        )}
 
-                  <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-md">
-                    {award.year}
-                  </span>
-                </div>
+        {/* Empty State */}
+        {!isLoading && !error && displayedAwards.length === 0 && (
+          <div className="bg-white/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center max-w-xl mx-auto space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-slate-800 text-amber-400 flex items-center justify-center mx-auto text-xl font-bold">
+              🏆
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">No Awards Found</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Awards and honors will be added soon. Please check back later.
+            </p>
+          </div>
+        )}
 
-                {/* Medal Icon & Title */}
-                <CardHeader className="p-0 pb-3">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform duration-300 shrink-0 border border-amber-200/60 dark:border-amber-900/50">
-                      <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 14.93V17h-2v-.07A7.001 7.001 0 015.07 12H5v-2h.07A7.001 7.001 0 0111 5.07V5h2v.07A7.001 7.001 0 0118.93 10H19v2h-.07A7.001 7.001 0 0113 16.93z" />
-                      </svg>
+        {/* Responsive Grid of Award Cards */}
+        {!isLoading && !error && displayedAwards.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {displayedAwards.map((award) => (
+              <Card
+                key={award.id}
+                variant="default"
+                hover
+                className="group relative flex flex-col justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:border-amber-400 dark:hover:border-amber-500"
+              >
+                <div>
+                  {/* Top Badges: Featured & Date */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <div className="flex items-center gap-1.5">
+                      {award.is_featured && (
+                        <Badge variant="accent" size="sm" className="font-bold">
+                          ★ Featured
+                        </Badge>
+                      )}
                     </div>
 
-                    <CardTitle className="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors font-sans leading-snug line-clamp-2">
-                      {award.name}
-                    </CardTitle>
+                    {award.award_date && (
+                      <span className="text-xs font-mono font-bold text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-950/80 px-2.5 py-1 rounded-md border border-amber-200/60 dark:border-amber-900/50">
+                        {award.award_date}
+                      </span>
+                    )}
                   </div>
 
-                  <p className="text-xs font-semibold text-blue-900 dark:text-blue-400">
-                    {award.organization}
-                  </p>
-                </CardHeader>
+                  {/* Icon / Image & Title */}
+                  <CardHeader className="p-0 pb-3">
+                    <div className="flex items-start gap-3 mb-2">
+                      {/* Image Thumbnail or Trophy Icon Fallback */}
+                      <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 shrink-0 border border-amber-200/60 dark:border-amber-900/50 flex items-center justify-center text-xl">
+                        {award.image_url && !failedImageIds[award.id] ? (
+                          <img
+                            src={award.image_url}
+                            alt={award.title}
+                            className="h-full w-full object-cover"
+                            onError={() => setFailedImageIds((prev) => ({ ...prev, [award.id]: true }))}
+                          />
+                        ) : (
+                          <span>🏆</span>
+                        )}
+                      </div>
 
-                {/* Short Description */}
-                <CardContent className="p-0 pt-1">
-                  <CardDescription className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-normal">
-                    {award.description}
-                  </CardDescription>
-                </CardContent>
-              </div>
+                      <CardTitle className="text-lg font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors font-sans leading-snug line-clamp-2">
+                        {award.title}
+                      </CardTitle>
+                    </div>
 
-              {/* Timeline Indicator */}
-              <div className="mt-6 pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-                <span>Honors & Recognitions</span>
-                <span className="text-amber-600 dark:text-amber-400 font-bold">★ Conferred</span>
-              </div>
-            </Card>
-          ))}
+                    <p className="text-xs font-semibold text-blue-900 dark:text-blue-400">
+                      {award.awarding_body || award.organization || "Awarding organization not specified."}
+                    </p>
+                  </CardHeader>
+
+                  {/* Description */}
+                  <CardContent className="p-0 pt-1">
+                    <CardDescription className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-normal line-clamp-3">
+                      {award.description || "Award details will be added soon."}
+                    </CardDescription>
+                  </CardContent>
+                </div>
+
+                {/* Footer Link Button if external_url exists */}
+                <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
+                  <span className="text-[11px] font-mono text-amber-600 dark:text-amber-400 font-bold">
+                    ★ Honored
+                  </span>
+
+                  {award.external_url && (
+                    <a
+                      href={award.external_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-amber-500/10 text-slate-700 dark:text-slate-300 hover:text-amber-500 border border-slate-200 dark:border-slate-700 text-xs font-semibold transition-colors"
+                    >
+                      <span>View Announcement</span>
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </a>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* View All Awards Action Button */}
+        <div className="flex justify-center pt-2">
+          <Link href="/awards" passHref>
+            <Button
+              variant="primary"
+              size="lg"
+              className="px-8 shadow-md"
+              rightIcon={
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  strokeWidth="2"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              }
+            >
+              View All Awards
+            </Button>
+          </Link>
         </div>
 
         {/* Achievement Statistics Section Below Cards */}
@@ -288,7 +348,7 @@ export const AwardsHonors: React.FC<AwardsHonorsProps> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {stats.map((stat) => (
+            {achievementStats.map((stat) => (
               <div
                 key={stat.label}
                 className="group relative p-6 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-amber-400 dark:hover:border-amber-500 transition-all duration-300 hover:-translate-y-1.5"

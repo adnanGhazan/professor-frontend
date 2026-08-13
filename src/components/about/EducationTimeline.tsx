@@ -103,7 +103,7 @@ export const EducationTimeline: React.FC<EducationTimelineProps> = ({
           <div className="relative max-w-4xl mx-auto pl-6 sm:pl-8 border-l-2 border-slate-200 dark:border-slate-800 space-y-10">
             {educations.map((edu) => {
               const yearsFormatted = formatYearRange(edu);
-              const honorsList = formatHonors(edu.honors);
+              const honorsList = formatHonors(edu.honors ?? undefined);
 
               return (
                 <div key={edu.id} className="relative group">

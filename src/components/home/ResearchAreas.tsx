@@ -145,106 +145,114 @@ export const ResearchAreas: React.FC<ResearchAreasProps> = ({ className = "" }) 
 
         {/* CARDS GRID VIEW */}
         {!isLoading && !error && displayedAreas.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {displayedAreas.map((area) => {
-              const hasValidImage = Boolean(area.image_url) && !failedImageIds[area.id];
-              const shortDesc = area.short_description && area.short_description.trim().length > 0
-                ? area.short_description
-                : "Research details will be added soon.";
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {displayedAreas.map((area) => {
+                const hasValidImage = Boolean(area.image_url) && !failedImageIds[area.id];
+                const displayDesc =
+                  (area.short_description && area.short_description.trim().length > 0)
+                    ? area.short_description
+                    : (area.description && area.description.trim().length > 0)
+                      ? area.description
+                      : "Research details will be added soon.";
 
-              return (
-                <Card
-                  key={area.id}
-                  variant="default"
-                  hover
-                  className="group relative flex flex-col justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-blue-400 dark:hover:border-blue-600 rounded-3xl"
-                >
-                  <div className="space-y-4">
-                    {/* Cover Image / Fallback Graphic */}
-                    <div className="relative w-full h-44 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 flex items-center justify-center shrink-0">
-                      {hasValidImage ? (
-                        <img
-                          src={area.image_url!}
-                          alt={area.title}
-                          onError={() => handleImageError(area.id)}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="flex flex-col items-center justify-center p-4 text-center text-slate-400 dark:text-slate-600">
-                          <svg
-                            className="w-10 h-10 mb-1 group-hover:scale-110 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-all duration-300"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                          >
-                            <circle cx="12" cy="12" r="10" />
-                            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-                            <path d="M2 12h20" />
-                          </svg>
-                          <span className="text-[10px] font-mono tracking-wider uppercase text-slate-400">
-                            Research Domain
-                          </span>
-                        </div>
-                      )}
+                return (
+                  <Card
+                    key={area.id}
+                    variant="default"
+                    hover
+                    className="group relative flex flex-col justify-between bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/80 dark:border-slate-800 p-6 sm:p-8 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:border-blue-400 dark:hover:border-blue-600 rounded-3xl"
+                  >
+                    <div className="space-y-4">
+                      {/* Cover Image / Fallback Graphic */}
+                      <div className="relative w-full h-44 rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 border border-slate-200/60 dark:border-slate-800 flex items-center justify-center shrink-0">
+                        {hasValidImage ? (
+                          <img
+                            src={area.image_url!}
+                            alt={area.title}
+                            onError={() => handleImageError(area.id)}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center p-4 text-center text-slate-400 dark:text-slate-600">
+                            <svg
+                              className="w-10 h-10 mb-1 group-hover:scale-110 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-all duration-300"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                            >
+                              <circle cx="12" cy="12" r="10" />
+                              <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                              <path d="M2 12h20" />
+                            </svg>
+                            <span className="text-[10px] font-mono tracking-wider uppercase text-slate-400">
+                              Research Domain
+                            </span>
+                          </div>
+                        )}
 
-                      {/* Featured Badge Overlay */}
-                      {area.is_featured && (
-                        <div className="absolute top-3 right-3 z-10">
-                          <Badge
-                            variant="primary"
-                            size="sm"
-                            className="bg-amber-500/90 text-slate-950 font-bold border border-amber-400 shadow-md backdrop-blur-md px-2.5 py-0.5"
-                          >
-                            ★ Featured
-                          </Badge>
-                        </div>
-                      )}
+                        {/* Featured Badge Overlay */}
+                        {area.is_featured && (
+                          <div className="absolute top-3 right-3 z-10">
+                            <Badge
+                              variant="primary"
+                              size="sm"
+                              className="bg-amber-500/90 text-slate-950 font-bold border border-amber-400 shadow-md backdrop-blur-md px-2.5 py-0.5"
+                            >
+                              ★ Featured
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Content: Title & Short Description */}
+                      <CardHeader className="p-0 space-y-2">
+                        <CardTitle className="text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors font-sans">
+                          {area.title}
+                        </CardTitle>
+                      </CardHeader>
+
+                      <CardContent className="p-0">
+                        <CardDescription className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal line-clamp-3">
+                          {displayDesc}
+                        </CardDescription>
+                      </CardContent>
                     </div>
+                  </Card>
+                );
+              })}
+            </div>
 
-                    {/* Content: Title & Short Description */}
-                    <CardHeader className="p-0 space-y-2">
-                      <CardTitle className="text-xl font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors font-sans">
-                        {area.title}
-                      </CardTitle>
-                    </CardHeader>
-
-                    <CardContent className="p-0">
-                      <CardDescription className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-normal line-clamp-3">
-                        {shortDesc}
-                      </CardDescription>
-                    </CardContent>
-                  </div>
-
-                  {/* Footer: Learn More Action Button */}
-                  <div className="mt-8 pt-4 border-t border-slate-100 dark:border-slate-800/60">
-                    <Link href="/research" className="w-full block">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        fullWidth
-                        className="justify-between text-blue-900 dark:text-blue-400 group-hover:bg-blue-50 dark:group-hover:bg-blue-950/50 font-semibold cursor-pointer"
-                        rightIcon={
-                          <svg
-                            className="w-4 h-4 group-hover:translate-x-1 transition-transform"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            strokeWidth="2"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                          </svg>
-                        }
-                      >
-                        Learn More
-                      </Button>
-                    </Link>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
+            {/* View All Research Action Button */}
+            <div className="flex justify-center pt-6">
+              <Link href="/research">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="px-8 shadow-md"
+                  rightIcon={
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M17 8l4 4m0 0l-4 4m4-4H3"
+                      />
+                    </svg>
+                  }
+                >
+                  View All Research
+                </Button>
+              </Link>
+            </div>
+          </>
         )}
       </div>
     </Section>

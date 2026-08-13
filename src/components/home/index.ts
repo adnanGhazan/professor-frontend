@@ -8,3 +8,5 @@ export * from "./TeachingExperience";
 export * from "./StudentsSupervision";
 export * from "./AwardsHonors";
 export * from "./LatestNews";
+export * from "./LatestVideos";
+export * from "./PhotoGallery";

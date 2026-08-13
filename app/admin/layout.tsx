@@ -13,9 +13,9 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  const isLoginPage = pathname === "/admin/login";
+  const isAuthOrIndexPage = pathname === "/admin/login" || pathname === "/admin";
 
-  if (isLoginPage) {
+  if (isAuthOrIndexPage) {
     return (
       <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex flex-col">
         {children}
