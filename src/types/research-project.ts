@@ -14,6 +14,7 @@ export interface ResearchProject {
   start_date: string | null;
   end_date: string | null;
   status: string | null;
+  project_type?: string | null;
   funding_source: string | null;
   project_url: string | null;
   image: string | null;

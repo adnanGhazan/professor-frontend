@@ -12,9 +12,13 @@ import { Button } from "../ui/button";
 
 export interface LatestNewsProps {
   className?: string;
+  showViewAll?: boolean;
 }
 
-export const LatestNews: React.FC<LatestNewsProps> = ({ className = "" }) => {
+export const LatestNews: React.FC<LatestNewsProps> = ({
+  className = "",
+  showViewAll = true,
+}) => {
   const [articles, setArticles] = useState<NewsArticle[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,10 +73,10 @@ export const LatestNews: React.FC<LatestNewsProps> = ({ className = "" }) => {
     return "News article content will be added soon.";
   };
 
-  // Get external URL if present
+  // Get article URL helper
   const getArticleUrl = (article: NewsArticle) => {
-    if ((article as any).external_url) {
-      return (article as any).external_url;
+    if (article.external_url && article.external_url.trim() !== "") {
+      return article.external_url.trim();
     }
     return "/news";
   };
@@ -146,8 +150,9 @@ export const LatestNews: React.FC<LatestNewsProps> = ({ className = "" }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {displayedArticles.map((article) => {
               const formattedDate = formatDate(article.published_at);
-              const articleUrl = getArticleUrl(article);
-              const isExternal = articleUrl.startsWith("http");
+              const isExternal = Boolean(article.external_url && article.external_url.trim() !== "");
+              const internalSlug = article.slug || article.id;
+              const articleUrl = isExternal ? article.external_url!.trim() : `/news/${internalSlug}`;
 
               return (
                 <Card
@@ -255,11 +260,11 @@ export const LatestNews: React.FC<LatestNewsProps> = ({ className = "" }) => {
                               </svg>
                             }
                           >
-                            Read Full Article
+                            Read Article
                           </Button>
                         </a>
                       ) : (
-                        <Link href="/news" passHref className="w-full">
+                        <Link href={articleUrl} passHref className="w-full">
                           <Button
                             variant="ghost"
                             size="sm"
@@ -294,28 +299,35 @@ export const LatestNews: React.FC<LatestNewsProps> = ({ className = "" }) => {
         )}
 
         {/* View All News Action Button */}
-        <div className="flex justify-center pt-6">
-          <Link href="/news" passHref>
-            <Button
-              variant="primary"
-              size="lg"
-              className="px-8 shadow-md"
-              rightIcon={
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  strokeWidth="2"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              }
-            >
-              View All News
-            </Button>
-          </Link>
-        </div>
+        {/* View All News Action Button */}
+        {showViewAll && (
+          <div className="flex justify-center pt-6">
+            <Link href="/news" passHref>
+              <Button
+                variant="primary"
+                size="lg"
+                className="px-8 shadow-md"
+                rightIcon={
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17 8l4 4m0 0l-4 4m4-4H3"
+                    />
+                  </svg>
+                }
+              >
+                View All News
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
     </Section>
   );

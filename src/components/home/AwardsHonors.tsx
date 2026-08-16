@@ -22,11 +22,13 @@ export interface AchievementStatItem {
 export interface AwardsHonorsProps {
   stats?: AchievementStatItem[];
   className?: string;
+  showViewAll?: boolean;
 }
 
 export const AwardsHonors: React.FC<AwardsHonorsProps> = ({
   stats: statsProp,
   className = "",
+  showViewAll = true,
 }) => {
   const [awards, setAwards] = useState<Award[]>([]);
   const [projects, setProjects] = useState<ResearchProject[]>([]);
@@ -313,29 +315,34 @@ export const AwardsHonors: React.FC<AwardsHonorsProps> = ({
         )}
 
         {/* View All Awards Action Button */}
-        <div className="flex justify-center pt-2">
-          <Link href="/awards" passHref>
-            <Button
-              variant="primary"
-              size="lg"
-              className="px-8 shadow-md"
-              rightIcon={
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  strokeWidth="2"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              }
+        {/* View All Awards Action Button */}
+        {showViewAll && !isLoading && !error && displayedAwards.length > 0 && (
+          <div className="flex justify-center pt-2">
+            <Link
+              href="/awards"
+              className="inline-flex items-center justify-center gap-3 px-10 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-base transition-all duration-300 shadow-lg hover:shadow-xl"
             >
-              View All Awards
-            </Button>
-          </Link>
-        </div>
+              <span>View All Awards</span>
 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14" />
+                <path d="m13 6 6 6-6 6" />
+              </svg>
+            </Link>
+          </div>
+        )}
+
+        {/* Achievement Statistics Section Below Cards */}
         {/* Achievement Statistics Section Below Cards */}
         <div className="pt-10 border-t border-slate-200/80 dark:border-slate-800/80 space-y-8">
           <div className="text-center max-w-xl mx-auto space-y-2">

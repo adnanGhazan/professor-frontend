@@ -54,6 +54,7 @@ export default function AdminResearchProjectsPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [status, setStatus] = useState("Ongoing");
+  const [projectType, setProjectType] = useState("research");
   const [fundingSource, setFundingSource] = useState("");
   const [projectUrl, setProjectUrl] = useState("");
   const [isFeatured, setIsFeatured] = useState(false);
@@ -149,6 +150,7 @@ export default function AdminResearchProjectsPage() {
     setStartDate("");
     setEndDate("");
     setStatus("Ongoing");
+    setProjectType("research");
     setFundingSource("");
     setProjectUrl("");
     setIsFeatured(false);
@@ -170,6 +172,7 @@ export default function AdminResearchProjectsPage() {
     setStartDate(item.start_date || "");
     setEndDate(item.end_date || "");
     setStatus(item.status || "Ongoing");
+    setProjectType(item.project_type || "research");
     setFundingSource(item.funding_source || "");
     setProjectUrl(item.project_url || "");
     setIsFeatured(Boolean(item.is_featured));
@@ -211,6 +214,7 @@ export default function AdminResearchProjectsPage() {
         if (startDate) formData.append("start_date", startDate);
         if (endDate) formData.append("end_date", endDate);
         if (status) formData.append("status", status);
+        if (projectType) formData.append("project_type", projectType);
         if (fundingSource) formData.append("funding_source", fundingSource);
         if (projectUrl) formData.append("project_url", projectUrl);
         formData.append("is_featured", isFeatured ? "1" : "0");
@@ -238,6 +242,7 @@ export default function AdminResearchProjectsPage() {
           start_date: startDate || null,
           end_date: endDate || null,
           status: status || null,
+          project_type: projectType || "research",
           funding_source: fundingSource || null,
           project_url: projectUrl || null,
           is_featured: isFeatured,
@@ -683,7 +688,7 @@ export default function AdminResearchProjectsPage() {
       {/* CREATE / EDIT FORM MODAL */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-hidden">
             {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
@@ -698,10 +703,10 @@ export default function AdminResearchProjectsPage() {
               initial={{ opacity: 0, scale: 0.95, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 16 }}
-              className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-slate-950 overflow-hidden z-10 my-8"
+              className="relative w-full max-w-2xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl shadow-slate-950 z-10 flex flex-col overflow-hidden my-auto"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
+              {/* Sticky Header */}
+              <div className="shrink-0 flex items-center justify-between p-5 sm:p-6 border-b border-slate-800 bg-slate-900 z-10">
                 <div>
                   <h3 className="text-xl font-bold text-slate-100">
                     {editingId ? "Edit Research Project" : "Add Research Project"}
@@ -720,265 +725,287 @@ export default function AdminResearchProjectsPage() {
               </div>
 
               {/* Form */}
-              <form onSubmit={handleSubmitForm} className="space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Research Area Dropdown */}
-                  <div className="space-y-1 sm:col-span-2">
-                    <label htmlFor="proj-area" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Associated Research Area
-                    </label>
-                    <select
-                      id="proj-area"
-                      value={researchAreaId}
-                      onChange={(e) => setResearchAreaId(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
-                    >
-                      <option value="" className="bg-slate-900 text-slate-400">Select Research Area (Optional)</option>
-                      {researchAreas.map((area) => (
-                        <option key={area.id} value={area.id} className="bg-slate-900 text-slate-200">
-                          {area.title}
-                        </option>
-                      ))}
-                    </select>
-                    {validationErrors?.research_area_id?.[0] && (
-                      <p className="text-xs text-red-400 font-medium">{validationErrors.research_area_id[0]}</p>
-                    )}
-                  </div>
-
-                  {/* Title */}
-                  <div className="space-y-1 sm:col-span-2">
-                    <label htmlFor="proj-title" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Project Title <span className="text-amber-400">*</span>
-                    </label>
-                    <input
-                      id="proj-title"
-                      type="text"
-                      required
-                      value={title}
-                      onChange={(e) => setTitle(e.target.value)}
-                      placeholder="e.g. Autonomous Swarm Robotics for Search and Rescue"
-                      className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
-                    />
-                    {validationErrors?.title?.[0] && (
-                      <p className="text-xs text-red-400 font-medium">{validationErrors.title[0]}</p>
-                    )}
-                  </div>
-
-                  {/* Slug */}
-                  <div className="space-y-1 sm:col-span-2">
-                    <label htmlFor="proj-slug" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Slug <span className="text-slate-500 text-[10px] font-mono font-normal">(Optional - auto-generated from title if blank)</span>
-                    </label>
-                    <input
-                      id="proj-slug"
-                      type="text"
-                      value={slug}
-                      onChange={(e) => setSlug(e.target.value)}
-                      placeholder="autonomous-swarm-robotics-search-and-rescue"
-                      className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
-                    />
-                    {validationErrors?.slug?.[0] && (
-                      <p className="text-xs text-red-400 font-medium">{validationErrors.slug[0]}</p>
-                    )}
-                  </div>
-
-                  {/* Start Date */}
-                  <div className="space-y-1">
-                    <label htmlFor="proj-start" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Start Date
-                    </label>
-                    <input
-                      id="proj-start"
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
-                    />
-                    {validationErrors?.start_date?.[0] && (
-                      <p className="text-xs text-red-400 font-medium">{validationErrors.start_date[0]}</p>
-                    )}
-                  </div>
-
-                  {/* End Date */}
-                  <div className="space-y-1">
-                    <label htmlFor="proj-end" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      End Date
-                    </label>
-                    <input
-                      id="proj-end"
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
-                    />
-                    {validationErrors?.end_date?.[0] && (
-                      <p className="text-xs text-red-400 font-medium">{validationErrors.end_date[0]}</p>
-                    )}
-                  </div>
-
-                  {/* Status */}
-                  <div className="space-y-1">
-                    <label htmlFor="proj-status" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Project Status
-                    </label>
-                    <select
-                      id="proj-status"
-                      value={status}
-                      onChange={(e) => setStatus(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
-                    >
-                      <option value="Ongoing" className="bg-slate-900 text-slate-200">Ongoing</option>
-                      <option value="Completed" className="bg-slate-900 text-slate-200">Completed</option>
-                      <option value="Proposed" className="bg-slate-900 text-slate-200">Proposed</option>
-                    </select>
-                    {validationErrors?.status?.[0] && (
-                      <p className="text-xs text-red-400 font-medium">{validationErrors.status[0]}</p>
-                    )}
-                  </div>
-
-                  {/* Funding Source */}
-                  <div className="space-y-1">
-                    <label htmlFor="proj-funding" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Funding Source / Sponsor
-                    </label>
-                    <input
-                      id="proj-funding"
-                      type="text"
-                      value={fundingSource}
-                      onChange={(e) => setFundingSource(e.target.value)}
-                      placeholder="e.g. National Science Foundation ($500K)"
-                      className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
-                    />
-                    {validationErrors?.funding_source?.[0] && (
-                      <p className="text-xs text-red-400 font-medium">{validationErrors.funding_source[0]}</p>
-                    )}
-                  </div>
-
-                  {/* Project URL */}
-                  <div className="space-y-1 sm:col-span-2">
-                    <label htmlFor="proj-url" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Project Website / External Repository URL
-                    </label>
-                    <input
-                      id="proj-url"
-                      type="url"
-                      value={projectUrl}
-                      onChange={(e) => setProjectUrl(e.target.value)}
-                      placeholder="https://github.com/lab/swarm-project"
-                      className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
-                    />
-                    {validationErrors?.project_url?.[0] && (
-                      <p className="text-xs text-red-400 font-medium">{validationErrors.project_url[0]}</p>
-                    )}
-                  </div>
-
-                  {/* Description */}
-                  <div className="space-y-1 sm:col-span-2">
-                    <label htmlFor="proj-desc" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Project Overview & Objectives
-                    </label>
-                    <textarea
-                      id="proj-desc"
-                      rows={4}
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Detailed overview of research objectives, methodologies, and outcomes..."
-                      className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20 leading-relaxed"
-                    />
-                    {validationErrors?.description?.[0] && (
-                      <p className="text-xs text-red-400 font-medium">{validationErrors.description[0]}</p>
-                    )}
-                  </div>
-
-                  {/* Cover Image Upload & Preview */}
-                  <div className="space-y-2 sm:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
-                      Project Cover Image <span className="text-slate-500 text-[10px] font-mono font-normal">(JPEG, PNG, WEBP, SVG ≤ 2MB)</span>
-                    </label>
-
-                    {imagePreviewUrl ? (
-                      <div className="relative w-full h-36 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 group">
-                        <img
-                          src={imagePreviewUrl}
-                          alt="Project Cover Preview"
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                          <label
-                            htmlFor="proj-image-file"
-                            className="px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs cursor-pointer hover:bg-amber-400 transition-colors"
-                          >
-                            Replace
-                          </label>
-                          <button
-                            type="button"
-                            onClick={handleRemoveImageFile}
-                            className="px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold text-xs hover:bg-red-500 transition-colors cursor-pointer"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <label
-                        htmlFor="proj-image-file"
-                        className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-800 hover:border-amber-500/50 rounded-2xl bg-slate-950/50 hover:bg-slate-950 transition-all cursor-pointer text-center group"
+              <form onSubmit={handleSubmitForm} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+                {/* Scrollable Content Body */}
+                <div className="flex-1 overflow-y-auto overflow-x-hidden p-5 sm:p-6 space-y-5 custom-scrollbar">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Research Area Dropdown */}
+                    <div className="space-y-1 sm:col-span-2">
+                      <label htmlFor="proj-area" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        Associated Research Area
+                      </label>
+                      <select
+                        id="proj-area"
+                        value={researchAreaId}
+                        onChange={(e) => setResearchAreaId(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-slate-500 group-hover:text-amber-400 transition-colors mb-2">
-                          <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3A2 2 0 0 0 6.9 2.5H4a2 2 0 0 0-2 2v13.5a2 2 0 0 0 2 2Z" />
-                        </svg>
-                        <span className="text-xs font-semibold text-slate-300 group-hover:text-amber-400 transition-colors">
-                          Click to select cover image
-                        </span>
-                        <span className="text-[10px] text-slate-500 mt-1">
-                          PNG, JPG, WEBP, SVG up to 2MB
+                        <option value="" className="bg-slate-900 text-slate-400">Select Research Area (Optional)</option>
+                        {researchAreas.map((area) => (
+                          <option key={area.id} value={area.id} className="bg-slate-900 text-slate-200">
+                            {area.title}
+                          </option>
+                        ))}
+                      </select>
+                      {validationErrors?.research_area_id?.[0] && (
+                        <p className="text-xs text-red-400 font-medium">{validationErrors.research_area_id[0]}</p>
+                      )}
+                    </div>
+
+                    {/* Title */}
+                    <div className="space-y-1 sm:col-span-2">
+                      <label htmlFor="proj-title" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        Project Title <span className="text-amber-400">*</span>
+                      </label>
+                      <input
+                        id="proj-title"
+                        type="text"
+                        required
+                        value={title}
+                        onChange={(e) => setTitle(e.target.value)}
+                        placeholder="e.g. Autonomous Swarm Robotics for Search and Rescue"
+                        className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
+                      />
+                      {validationErrors?.title?.[0] && (
+                        <p className="text-xs text-red-400 font-medium">{validationErrors.title[0]}</p>
+                      )}
+                    </div>
+
+                    {/* Slug */}
+                    <div className="space-y-1 sm:col-span-2">
+                      <label htmlFor="proj-slug" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        Slug <span className="text-slate-500 text-[10px] font-mono font-normal">(Optional - auto-generated from title if blank)</span>
+                      </label>
+                      <input
+                        id="proj-slug"
+                        type="text"
+                        value={slug}
+                        onChange={(e) => setSlug(e.target.value)}
+                        placeholder="autonomous-swarm-robotics-search-and-rescue"
+                        className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
+                      />
+                      {validationErrors?.slug?.[0] && (
+                        <p className="text-xs text-red-400 font-medium">{validationErrors.slug[0]}</p>
+                      )}
+                    </div>
+
+                    {/* Start Date */}
+                    <div className="space-y-1">
+                      <label htmlFor="proj-start" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        Start Date
+                      </label>
+                      <input
+                        id="proj-start"
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
+                      />
+                      {validationErrors?.start_date?.[0] && (
+                        <p className="text-xs text-red-400 font-medium">{validationErrors.start_date[0]}</p>
+                      )}
+                    </div>
+
+                    {/* End Date */}
+                    <div className="space-y-1">
+                      <label htmlFor="proj-end" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        End Date
+                      </label>
+                      <input
+                        id="proj-end"
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
+                      />
+                      {validationErrors?.end_date?.[0] && (
+                        <p className="text-xs text-red-400 font-medium">{validationErrors.end_date[0]}</p>
+                      )}
+                    </div>
+
+                    {/* Project Type */}
+                    <div className="space-y-1">
+                      <label htmlFor="proj-type" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        Project Type
+                      </label>
+                      <select
+                        id="proj-type"
+                        value={projectType}
+                        onChange={(e) => setProjectType(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
+                      >
+                        <option value="research" className="bg-slate-900 text-slate-200">Research Project</option>
+                        <option value="training" className="bg-slate-900 text-slate-200">Training Project</option>
+                      </select>
+                      {validationErrors?.project_type?.[0] && (
+                        <p className="text-xs text-red-400 font-medium">{validationErrors.project_type[0]}</p>
+                      )}
+                    </div>
+
+                    {/* Status */}
+                    <div className="space-y-1">
+                      <label htmlFor="proj-status" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        Project Status
+                      </label>
+                      <select
+                        id="proj-status"
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
+                      >
+                        <option value="Ongoing" className="bg-slate-900 text-slate-200">Ongoing</option>
+                        <option value="Completed" className="bg-slate-900 text-slate-200">Completed</option>
+                        <option value="Proposed" className="bg-slate-900 text-slate-200">Proposed</option>
+                      </select>
+                      {validationErrors?.status?.[0] && (
+                        <p className="text-xs text-red-400 font-medium">{validationErrors.status[0]}</p>
+                      )}
+                    </div>
+
+                    {/* Funding Source */}
+                    <div className="space-y-1">
+                      <label htmlFor="proj-funding" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        Funding Source / Sponsor
+                      </label>
+                      <input
+                        id="proj-funding"
+                        type="text"
+                        value={fundingSource}
+                        onChange={(e) => setFundingSource(e.target.value)}
+                        placeholder="e.g. National Science Foundation ($500K)"
+                        className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
+                      />
+                      {validationErrors?.funding_source?.[0] && (
+                        <p className="text-xs text-red-400 font-medium">{validationErrors.funding_source[0]}</p>
+                      )}
+                    </div>
+
+                    {/* Project URL */}
+                    <div className="space-y-1 sm:col-span-2">
+                      <label htmlFor="proj-url" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        Project Website / External Repository URL
+                      </label>
+                      <input
+                        id="proj-url"
+                        type="url"
+                        value={projectUrl}
+                        onChange={(e) => setProjectUrl(e.target.value)}
+                        placeholder="https://github.com/lab/swarm-project"
+                        className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
+                      />
+                      {validationErrors?.project_url?.[0] && (
+                        <p className="text-xs text-red-400 font-medium">{validationErrors.project_url[0]}</p>
+                      )}
+                    </div>
+
+                    {/* Description */}
+                    <div className="space-y-1 sm:col-span-2">
+                      <label htmlFor="proj-desc" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        Project Overview & Objectives
+                      </label>
+                      <textarea
+                        id="proj-desc"
+                        rows={4}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Detailed overview of research objectives, methodologies, and outcomes..."
+                        className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20 leading-relaxed"
+                      />
+                      {validationErrors?.description?.[0] && (
+                        <p className="text-xs text-red-400 font-medium">{validationErrors.description[0]}</p>
+                      )}
+                    </div>
+
+                    {/* Cover Image Upload & Preview */}
+                    <div className="space-y-2 sm:col-span-2">
+                      <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        Project Cover Image <span className="text-slate-500 text-[10px] font-mono font-normal">(JPEG, PNG, WEBP, SVG ≤ 2MB)</span>
+                      </label>
+
+                      {imagePreviewUrl ? (
+                        <div className="relative w-full h-36 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 group">
+                          <img
+                            src={imagePreviewUrl}
+                            alt="Project Cover Preview"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                            <label
+                              htmlFor="proj-image-file"
+                              className="px-3 py-1.5 rounded-lg bg-amber-500 text-slate-950 font-bold text-xs cursor-pointer hover:bg-amber-400 transition-colors"
+                            >
+                              Replace
+                            </label>
+                            <button
+                              type="button"
+                              onClick={handleRemoveImageFile}
+                              className="px-3 py-1.5 rounded-lg bg-red-600 text-white font-bold text-xs hover:bg-red-500 transition-colors cursor-pointer"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <label
+                          htmlFor="proj-image-file"
+                          className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-800 hover:border-amber-500/50 rounded-2xl bg-slate-950/50 hover:bg-slate-950 transition-all cursor-pointer text-center group"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-slate-500 group-hover:text-amber-400 transition-colors mb-2">
+                            <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3A2 2 0 0 0 6.9 2.5H4a2 2 0 0 0-2 2v13.5a2 2 0 0 0 2 2Z" />
+                          </svg>
+                          <span className="text-xs font-semibold text-slate-300 group-hover:text-amber-400 transition-colors">
+                            Click to select cover image
+                          </span>
+                          <span className="text-[10px] text-slate-500 mt-1">
+                            PNG, JPG, WEBP, SVG up to 2MB
+                          </span>
+                        </label>
+                      )}
+
+                      <input
+                        id="proj-image-file"
+                        type="file"
+                        accept="image/jpeg,image/png,image/jpg,image/gif,image/svg+xml,image/webp"
+                        onChange={handleImageFileChange}
+                        className="hidden"
+                      />
+
+                      {validationErrors?.image?.[0] && (
+                        <p className="text-xs text-red-400 font-medium">{validationErrors.image[0]}</p>
+                      )}
+                    </div>
+
+                    {/* Checkboxes: Featured & Visible */}
+                    <div className="space-y-3 pt-2 sm:col-span-2 flex flex-row items-center gap-8">
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={isFeatured}
+                          onChange={(e) => setIsFeatured(e.target.checked)}
+                          className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500/20"
+                        />
+                        <span className="text-xs font-semibold text-slate-300">
+                          Mark as Featured Project
                         </span>
                       </label>
-                    )}
 
-                    <input
-                      id="proj-image-file"
-                      type="file"
-                      accept="image/jpeg,image/png,image/jpg,image/gif,image/svg+xml,image/webp"
-                      onChange={handleImageFileChange}
-                      className="hidden"
-                    />
-
-                    {validationErrors?.image?.[0] && (
-                      <p className="text-xs text-red-400 font-medium">{validationErrors.image[0]}</p>
-                    )}
-                  </div>
-
-                  {/* Checkboxes: Featured & Visible */}
-                  <div className="space-y-3 pt-2 sm:col-span-2 flex flex-row items-center gap-8">
-                    <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={isFeatured}
-                        onChange={(e) => setIsFeatured(e.target.checked)}
-                        className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500/20"
-                      />
-                      <span className="text-xs font-semibold text-slate-300">
-                        Mark as Featured Project
-                      </span>
-                    </label>
-
-                    <label className="flex items-center gap-2.5 cursor-pointer select-none">
-                      <input
-                        type="checkbox"
-                        checked={isVisible}
-                        onChange={(e) => setIsVisible(e.target.checked)}
-                        className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500/20"
-                      />
-                      <span className="text-xs font-semibold text-slate-300">
-                        Visible on Public Site
-                      </span>
-                    </label>
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={isVisible}
+                          onChange={(e) => setIsVisible(e.target.checked)}
+                          className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-amber-500 focus:ring-amber-500/20"
+                        />
+                        <span className="text-xs font-semibold text-slate-300">
+                          Visible on Public Site
+                        </span>
+                      </label>
+                    </div>
                   </div>
                 </div>
 
-                {/* Modal Buttons */}
-                <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                {/* Sticky Action Footer */}
+                <div className="shrink-0 flex items-center justify-end gap-3 p-4 sm:px-6 border-t border-slate-800 bg-slate-900/95 backdrop-blur-md">
                   <button
                     type="button"
                     disabled={isSubmitting}

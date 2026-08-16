@@ -13,9 +13,13 @@ import { Button } from "../ui/button";
 
 export interface PhotoGalleryProps {
   className?: string;
+  showViewAll?: boolean;
 }
 
-export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className = "" }) => {
+export const PhotoGallery: React.FC<PhotoGalleryProps> = ({
+  className = "",
+  showViewAll = true,
+}) => {
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -243,28 +247,20 @@ export const PhotoGallery: React.FC<PhotoGalleryProps> = ({ className = "" }) =>
         )}
 
         {/* View All Gallery Button */}
-        <div className="flex justify-center pt-4">
-          <Link href="/gallery" passHref>
-            <Button
-              variant="primary"
-              size="lg"
-              className="px-8 shadow-md bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold"
-              rightIcon={
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  strokeWidth="2"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              }
-            >
-              Explore Full Gallery
-            </Button>
-          </Link>
-        </div>
+        {/* Explore Full Gallery Button */}
+        {showViewAll && (
+          <div className="flex justify-center pt-6">
+            <Link href="/gallery" passHref>
+              <Button
+                variant="primary"
+                size="lg"
+                className="px-8 shadow-md"
+              >
+                Explore Full Gallery
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* RESPONSIVE LIGHTBOX MODAL WITH KEYBOARD & PREV/NEXT CONTROLS */}

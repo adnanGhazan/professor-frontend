@@ -9,14 +9,14 @@ export interface NavigationItem {
 export const DEFAULT_NAV_ITEMS: NavigationItem[] = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
-  { label: "Research", href: "/research" },
+  { label: "Projects", href: "/projects" },
   { label: "Publications", href: "/publications" },
   { label: "Teaching", href: "/teaching" },
   { label: "Students", href: "/students" },
   { label: "Awards", href: "/awards" },
   { label: "News", href: "/news" },
   { label: "Gallery", href: "/gallery" },
-  { label: "Documents", href: "/documents" },
+  { label: "Course Resources", href: "/documents" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -34,7 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <nav
       aria-label="Main Navigation"
-      className={`hidden lg:flex items-center gap-1 xl:gap-2 ${className}`}
+      className={`hidden lg:flex items-center gap-0.5 xl:gap-1.5 ${className}`}
     >
       {items.map((item) => (
         <NavItem

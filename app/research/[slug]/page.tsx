@@ -88,11 +88,11 @@ export default function ResearchAreaDetailPage() {
   const hasValidImage = Boolean(area?.image_url) && !imageFailed;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pb-20">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-20">
       {/* Back Navigation Bar */}
       <Section variant="default" padding="sm" className="pt-8 pb-4 border-b border-slate-800/60">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link href="/research">
+          <Link href="/projects">
             <Button
               variant="outline"
               size="sm"
@@ -103,7 +103,7 @@ export default function ResearchAreaDetailPage() {
                 </svg>
               }
             >
-              Back to Research Areas
+              Back to Projects
             </Button>
           </Link>
         </div>
@@ -138,9 +138,9 @@ export default function ResearchAreaDetailPage() {
                 {error || "The requested research area could not be located."}
               </p>
             </div>
-            <Link href="/research">
+            <Link href="/projects">
               <Button variant="primary" size="md">
-                Browse All Research Areas
+                Browse All Projects
               </Button>
             </Link>
           </div>

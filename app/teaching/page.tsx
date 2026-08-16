@@ -29,5 +29,5 @@ export async function generateMetadata(): Promise<Metadata> {
 import { TeachingExperience } from "@/src/components/home/TeachingExperience";
 
 export default function TeachingPage() {
-  return <TeachingExperience />;
+  return <TeachingExperience showViewAll={false} />;
 }

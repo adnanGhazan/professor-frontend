@@ -15,6 +15,7 @@ export interface MobileMenuProps {
   onClose: () => void;
   items: MobileNavigationItem[];
   activeHref?: string;
+  onOpenBookMeeting?: () => void;
 }
 
 export const MobileMenu: React.FC<MobileMenuProps> = ({
@@ -22,6 +23,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
   onClose,
   items,
   activeHref = "/",
+  onOpenBookMeeting,
 }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -98,6 +100,19 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({
               </Link>
             );
           })}
+
+          <div className="pt-3">
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                if (onOpenBookMeeting) onOpenBookMeeting();
+              }}
+              className="w-full inline-flex items-center justify-center px-4 py-3 text-base font-semibold text-white bg-blue-900 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-xl shadow-xs transition-colors cursor-pointer"
+            >
+              Book a Meeting
+            </button>
+          </div>
         </div>
 
         <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">

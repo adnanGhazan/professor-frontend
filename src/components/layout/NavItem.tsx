@@ -20,7 +20,7 @@ export const NavItem: React.FC<NavItemProps> = ({
 }) => {
   const baseClasses = isMobile
     ? "flex items-center w-full px-4 py-3 text-base font-medium rounded-xl transition-all duration-200"
-    : "relative px-3 py-2 text-sm font-medium transition-all duration-200 rounded-lg inline-flex items-center";
+    : "relative px-2 xl:px-2.5 py-2 text-sm font-medium transition-all duration-200 rounded-lg inline-flex items-center whitespace-nowrap shrink-0";
 
   const activeClasses = isActive
     ? isMobile

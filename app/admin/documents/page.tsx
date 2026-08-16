@@ -44,6 +44,7 @@ export default function AdminDocumentsPage() {
   // Form Fields State
   const [title, setTitle] = useState("");
   const [documentType, setDocumentType] = useState("Syllabus");
+  const [lectureCategory, setLectureCategory] = useState("");
   const [publishedAt, setPublishedAt] = useState("");
   const [description, setDescription] = useState("");
   const [isVisible, setIsVisible] = useState(true);
@@ -147,6 +148,7 @@ export default function AdminDocumentsPage() {
     setEditingId(null);
     setTitle("");
     setDocumentType("Syllabus");
+    setLectureCategory("");
     setPublishedAt(new Date().toISOString().slice(0, 10));
     setDescription("");
     setIsVisible(true);
@@ -163,6 +165,7 @@ export default function AdminDocumentsPage() {
     setEditingId(item.id);
     setTitle(item.title || "");
     setDocumentType(item.document_type || "Syllabus");
+    setLectureCategory(item.lecture_category || "");
     setPublishedAt(item.published_at ? item.published_at.slice(0, 10) : "");
     setDescription(item.description || "");
     setIsVisible(item.is_visible !== false);
@@ -179,6 +182,7 @@ export default function AdminDocumentsPage() {
     if (!isSubmitting) {
       setIsModalOpen(false);
       setEditingId(null);
+      setLectureCategory("");
       setValidationErrors(null);
       setSelectedFile(null);
       setCurrentFileName(null);
@@ -199,6 +203,7 @@ export default function AdminDocumentsPage() {
         const formData = new FormData();
         formData.append("title", title);
         formData.append("document_type", documentType);
+        formData.append("lecture_category", documentType === "Lecture" ? (lectureCategory || "") : "");
         if (publishedAt) formData.append("published_at", publishedAt);
         if (description) formData.append("description", description);
         formData.append("is_visible", isVisible ? "1" : "0");
@@ -220,6 +225,7 @@ export default function AdminDocumentsPage() {
         const payload: Partial<DocumentRecord> = {
           title,
           document_type: documentType,
+          lecture_category: documentType === "Lecture" ? (lectureCategory || null) : null,
           published_at: publishedAt || null,
           description: description || null,
           is_visible: isVisible,
@@ -386,6 +392,7 @@ export default function AdminDocumentsPage() {
               <option value="" className="bg-slate-900 text-slate-200">All Types</option>
               <option value="Syllabus" className="bg-slate-900 text-slate-200">Syllabus</option>
               <option value="Lecture Notes" className="bg-slate-900 text-slate-200">Lecture Notes</option>
+              <option value="Lecture" className="bg-slate-900 text-slate-200">Lecture</option>
               <option value="CV / Bio" className="bg-slate-900 text-slate-200">CV / Bio</option>
               <option value="Lab Manual" className="bg-slate-900 text-slate-200">Lab Manual</option>
               <option value="Form" className="bg-slate-900 text-slate-200">Form</option>
@@ -672,6 +679,7 @@ export default function AdminDocumentsPage() {
                       >
                         <option value="Syllabus" className="bg-slate-900 text-slate-200">Syllabus</option>
                         <option value="Lecture Notes" className="bg-slate-900 text-slate-200">Lecture Notes</option>
+                        <option value="Lecture" className="bg-slate-900 text-slate-200">Lecture</option>
                         <option value="CV / Bio" className="bg-slate-900 text-slate-200">CV / Bio</option>
                         <option value="Lab Manual" className="bg-slate-900 text-slate-200">Lab Manual</option>
                         <option value="Form" className="bg-slate-900 text-slate-200">Form</option>
@@ -681,6 +689,26 @@ export default function AdminDocumentsPage() {
                         <p className="text-xs text-red-400 font-medium">{validationErrors.document_type[0]}</p>
                       )}
                     </div>
+
+                    {/* Lecture Category / Subject (shown only when Document Type is Lecture) */}
+                    {documentType === "Lecture" && (
+                      <div className="space-y-1 sm:col-span-2">
+                        <label htmlFor="lecture-category" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                          Lecture Category / Subject
+                        </label>
+                        <input
+                          id="lecture-category"
+                          type="text"
+                          value={lectureCategory}
+                          onChange={(e) => setLectureCategory(e.target.value)}
+                          placeholder="e.g. Artificial Intelligence, Machine Learning, Software Engineering"
+                          className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
+                        />
+                        {validationErrors?.lecture_category?.[0] && (
+                          <p className="text-xs text-red-400 font-medium">{validationErrors.lecture_category[0]}</p>
+                        )}
+                      </div>
+                    )}
 
                     {/* Published Date */}
                     <div className="space-y-1">

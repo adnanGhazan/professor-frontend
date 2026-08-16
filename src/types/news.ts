@@ -8,6 +8,7 @@ export interface NewsArticle {
   slug: string | null;
   excerpt: string | null;
   content: string | null;
+  external_url?: string | null;
   featured_image: string | null;
   image_url: string | null;
   status: "published" | "draft" | string;

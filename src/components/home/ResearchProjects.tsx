@@ -19,6 +19,7 @@ export const ResearchProjects: React.FC<ResearchProjectsProps> = ({ className = 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [failedImageIds, setFailedImageIds] = useState<Record<string | number, boolean>>({});
+  const [activeTab, setActiveTab] = useState<"research" | "training">("research");
 
   const fetchProjects = useCallback(async () => {
     setIsLoading(true);
@@ -62,8 +63,16 @@ export const ResearchProjects: React.FC<ResearchProjectsProps> = ({ className = 
     return status?.toLowerCase() === "ongoing" ? "Present" : "Timeline TBD";
   };
 
-  // Limit display to the top 6 projects
-  const displayedProjects = projects.slice(0, 6);
+  // Filter projects by project_type (defaulting missing project_type to 'research')
+  const isResearch = (p: ResearchProject) => !p.project_type || p.project_type.toLowerCase() === "research";
+  const isTraining = (p: ResearchProject) => p.project_type?.toLowerCase() === "training";
+
+  const currentTabProjects = projects.filter((p) =>
+    activeTab === "research" ? isResearch(p) : isTraining(p)
+  );
+
+  // Limit display to top 6 projects of active tab
+  const displayedProjects = currentTabProjects.slice(0, 6);
 
   return (
     <Section variant="default" padding="lg" className={`relative overflow-hidden ${className}`}>
@@ -81,10 +90,36 @@ export const ResearchProjects: React.FC<ResearchProjectsProps> = ({ className = 
         {/* Section Heading */}
         <SectionHeading
           eyebrow="Funded Initiatives"
-          title="Research Projects"
-          description="Ongoing scientific grants, fundamental research initiatives, and multi-disciplinary projects."
+          title="Research & Training Projects"
+          description="Ongoing scientific grants, fundamental research initiatives, training projects, and multi-disciplinary collaborations."
           align="center"
         />
+
+        {/* Filter Tabs */}
+        <div className="flex items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => setActiveTab("research")}
+            className={`px-5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all cursor-pointer ${
+              activeTab === "research"
+                ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 scale-105"
+                : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border border-slate-200/80 dark:border-slate-800"
+            }`}
+          >
+            Research Projects
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("training")}
+            className={`px-5 py-2.5 rounded-full text-xs font-bold tracking-wide transition-all cursor-pointer ${
+              activeTab === "training"
+                ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 scale-105"
+                : "bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border border-slate-200/80 dark:border-slate-800"
+            }`}
+          >
+            Training Projects
+          </button>
+        </div>
 
         {/* LOADING SKELETON STATE */}
         {isLoading && (
@@ -125,7 +160,7 @@ export const ResearchProjects: React.FC<ResearchProjectsProps> = ({ className = 
             </div>
             <div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                Failed to Load Research Projects
+                Failed to Load Projects
               </h3>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                 {error}
@@ -151,10 +186,12 @@ export const ResearchProjects: React.FC<ResearchProjectsProps> = ({ className = 
               </svg>
             </div>
             <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
-              No Research Projects Found
+              {activeTab === "research" ? "No Research Projects Found" : "No Training Projects Found"}
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Research project listings will be updated shortly. Check back soon.
+              {activeTab === "research"
+                ? "Research project listings will be updated shortly. Check back soon."
+                : "Training project listings will be updated shortly. Check back soon."}
             </p>
           </div>
         )}
@@ -202,7 +239,7 @@ export const ResearchProjects: React.FC<ResearchProjectsProps> = ({ className = 
                             <path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L8.6 3.3A2 2 0 0 0 6.9 2.5H4a2 2 0 0 0-2 2v13.5a2 2 0 0 0 2 2Z" />
                           </svg>
                           <span className="text-[10px] font-mono tracking-wider uppercase text-slate-400">
-                            Research Grant
+                            {proj.project_type?.toLowerCase() === "training" ? "Training Project" : "Research Grant"}
                           </span>
                         </div>
                       )}
@@ -278,7 +315,7 @@ export const ResearchProjects: React.FC<ResearchProjectsProps> = ({ className = 
 
                   {/* Actions & Links */}
                   <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between gap-3">
-                    <Link href="/research" className="flex-1">
+                    <Link href="/projects" className="flex-1">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -323,7 +360,7 @@ export const ResearchProjects: React.FC<ResearchProjectsProps> = ({ className = 
 
         {/* View All Projects Action Button */}
         <div className="flex justify-center pt-6">
-          <Link href="/research">
+          <Link href="/projects">
             <Button
               variant="primary"
               size="lg"

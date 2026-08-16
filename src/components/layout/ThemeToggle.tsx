@@ -12,12 +12,27 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({ className = "" }) => {
 
   useEffect(() => {
     setMounted(true);
-    const hasDarkClass = document.documentElement.classList.contains("dark");
-    const dataThemeDark = document.documentElement.getAttribute("data-theme") === "dark";
-    const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const savedTheme = localStorage.getItem("theme");
+    let dark: boolean;
 
-    if (hasDarkClass || dataThemeDark || systemPrefersDark) {
-      setIsDark(true);
+    if (savedTheme === "dark") {
+      dark = true;
+    } else if (savedTheme === "light") {
+      dark = false;
+    } else {
+      dark =
+        document.documentElement.classList.contains("dark") ||
+        document.documentElement.getAttribute("data-theme") === "dark" ||
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+
+    setIsDark(dark);
+    if (dark) {
+      document.documentElement.classList.add("dark");
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.setAttribute("data-theme", "light");
     }
   }, []);
 

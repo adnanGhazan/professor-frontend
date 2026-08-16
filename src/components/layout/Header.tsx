@@ -7,6 +7,7 @@ import { Logo } from "./Logo";
 import { Navbar, DEFAULT_NAV_ITEMS, NavigationItem } from "./Navbar";
 import { ThemeToggle } from "./ThemeToggle";
 import { MobileMenu } from "./MobileMenu";
+import { BookMeetingModal } from "../common/BookMeetingModal";
 import { SiteSettingService } from "@/src/services/site-setting.service";
 import { ProfileService } from "@/src/services/profile.service";
 export interface HeaderProps {
@@ -21,6 +22,7 @@ export const Header: React.FC<HeaderProps> = ({
   className = "",
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMeetingModalOpen, setIsMeetingModalOpen] = useState(false);
   const pathname = usePathname();
   const [siteTitle, setSiteTitle] = useState<string | undefined>();
   const [siteSubtitle, setSiteSubtitle] = useState<string | undefined>();
@@ -73,7 +75,15 @@ export const Header: React.FC<HeaderProps> = ({
           <Navbar items={navItems} activeHref={currentActiveHref} />
 
           {/* Desktop Actions & Mobile Trigger */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => setIsMeetingModalOpen(true)}
+              className="inline-flex items-center justify-center whitespace-nowrap px-3.5 py-2 text-xs sm:text-sm font-semibold text-white bg-blue-900 hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 rounded-xl shadow-xs transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-900 cursor-pointer active:scale-95 shrink-0"
+            >
+              Book a Meeting
+            </button>
+
             <div className="hidden lg:block">
               <ThemeToggle />
             </div>
@@ -110,6 +120,13 @@ export const Header: React.FC<HeaderProps> = ({
         onClose={() => setMobileMenuOpen(false)}
         items={navItems}
         activeHref={currentActiveHref}
+        onOpenBookMeeting={() => setIsMeetingModalOpen(true)}
+      />
+
+      {/* Book Meeting Modal */}
+      <BookMeetingModal
+        isOpen={isMeetingModalOpen}
+        onClose={() => setIsMeetingModalOpen(false)}
       />
     </header>
   );

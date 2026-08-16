@@ -12,10 +12,11 @@ import { Button } from "../ui/button";
 
 export interface FeaturedPublicationsProps {
   className?: string;
+  showViewAll?: boolean;
 }
-
 export const FeaturedPublications: React.FC<FeaturedPublicationsProps> = ({
   className = "",
+  showViewAll = true,
 }) => {
   const [publications, setPublications] = useState<Publication[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -236,28 +237,35 @@ export const FeaturedPublications: React.FC<FeaturedPublicationsProps> = ({
         )}
 
         {/* View All Publications Action Button */}
-        <div className="flex justify-center pt-6">
-          <Link href="/publications" passHref>
-            <Button
-              variant="primary"
-              size="lg"
-              className="px-8 shadow-md"
-              rightIcon={
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  strokeWidth="2"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              }
-            >
-              View All Publications
-            </Button>
-          </Link>
-        </div>
+        {/* View All Publications Action Button */}
+        {showViewAll && (
+          <div className="flex justify-center pt-6">
+            <Link href="/publications" passHref>
+              <Button
+                variant="primary"
+                size="lg"
+                className="px-8 shadow-md"
+                rightIcon={
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17 8l4 4m0 0l-4 4m4-4H3"
+                    />
+                  </svg>
+                }
+              >
+                View All Publications
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
     </Section>
   );

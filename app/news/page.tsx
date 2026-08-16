@@ -29,5 +29,5 @@ export async function generateMetadata(): Promise<Metadata> {
 import { LatestNews } from "@/src/components/home/LatestNews";
 
 export default function NewsPage() {
-  return <LatestNews />;
+  return <LatestNews showViewAll={false} />;
 }

@@ -210,7 +210,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = "" }) => {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-4 pt-2 w-full sm:w-auto">
-              <Link href="/research" passHref>
+              <Link href="/projects" passHref>
                 <Button
                   variant="primary"
                   size="lg"
@@ -230,7 +230,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ className = "" }) => {
                     </svg>
                   }
                 >
-                  View Research
+                  View Projects
                 </Button>
               </Link>
 

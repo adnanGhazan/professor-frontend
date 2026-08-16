@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import React, { useEffect, useState, useCallback } from "react";
 import { TeachingCourse } from "@/src/types/teaching";
 import { TeachingService } from "@/src/services/teaching.service";
@@ -19,10 +19,12 @@ export interface TeachingStatItem {
 export interface TeachingExperienceProps {
   stats?: TeachingStatItem[];
   className?: string;
+  showViewAll?: boolean;
 }
 
 export const TeachingExperience: React.FC<TeachingExperienceProps> = ({
   className = "",
+  showViewAll = true,
 }) => {
   const [courses, setCourses] = useState<TeachingCourse[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -261,7 +263,31 @@ export const TeachingExperience: React.FC<TeachingExperienceProps> = ({
             })}
           </div>
         )}
+        {showViewAll && !isLoading && !error && courses.length > 0 && (
+          <div className="flex justify-center pt-6">
+            <Link
+              href="/teaching"
+              className="inline-flex items-center justify-center gap-3 px-10 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-base transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              <span>View All Teaching</span>
 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14" />
+                <path d="m13 6 6 6-6 6" />
+              </svg>
+            </Link>
+          </div>
+        )}
         {/* Teaching Statistics Section Below Cards */}
         <div className="pt-10 border-t border-slate-200/80 dark:border-slate-800/80 space-y-8">
           <div className="text-center max-w-xl mx-auto space-y-2">
@@ -301,6 +327,8 @@ export const TeachingExperience: React.FC<TeachingExperienceProps> = ({
             ))}
           </div>
         </div>
+
+
       </div>
     </Section>
   );

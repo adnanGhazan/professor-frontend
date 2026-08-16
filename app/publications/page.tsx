@@ -29,5 +29,5 @@ export async function generateMetadata(): Promise<Metadata> {
 import { FeaturedPublications } from "@/src/components/home/FeaturedPublications";
 
 export default function PublicationsPage() {
-  return <FeaturedPublications />;
+  return <FeaturedPublications showViewAll={false} />;
 }

@@ -29,5 +29,5 @@ export async function generateMetadata(): Promise<Metadata> {
 import { AwardsHonors } from "@/src/components/home/AwardsHonors";
 
 export default function AwardsPage() {
-  return <AwardsHonors />;
+  return <AwardsHonors showViewAll={false} />;
 }

@@ -44,6 +44,7 @@ export default function AdminNewsPage() {
   // Form Fields State
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
+  const [externalUrl, setExternalUrl] = useState("");
   const [status, setStatus] = useState<string>("published");
   const [publishedAt, setPublishedAt] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -135,6 +136,7 @@ export default function AdminNewsPage() {
     setEditingId(null);
     setTitle("");
     setSlug("");
+    setExternalUrl("");
     setStatus("published");
     setPublishedAt(new Date().toISOString().slice(0, 10));
     setExcerpt("");
@@ -155,6 +157,7 @@ export default function AdminNewsPage() {
     setEditingId(item.id);
     setTitle(item.title || "");
     setSlug(item.slug || "");
+    setExternalUrl(item.external_url || "");
     setStatus(item.status || "published");
     setPublishedAt(item.published_at ? item.published_at.slice(0, 10) : "");
     setExcerpt(item.excerpt || "");
@@ -198,6 +201,7 @@ export default function AdminNewsPage() {
         const formData = new FormData();
         formData.append("title", title);
         if (slug) formData.append("slug", slug);
+        if (externalUrl) formData.append("external_url", externalUrl);
         if (status) formData.append("status", status);
         if (publishedAt) formData.append("published_at", publishedAt);
         if (excerpt) formData.append("excerpt", excerpt);
@@ -224,6 +228,7 @@ export default function AdminNewsPage() {
         const payload: Partial<NewsArticle> = {
           title,
           slug: slug || null,
+          external_url: externalUrl || null,
           status,
           published_at: publishedAt || null,
           excerpt: excerpt || null,
@@ -675,6 +680,24 @@ export default function AdminNewsPage() {
                       />
                       {validationErrors?.slug?.[0] && (
                         <p className="text-xs text-red-400 font-medium">{validationErrors.slug[0]}</p>
+                      )}
+                    </div>
+
+                    {/* External News URL */}
+                    <div className="space-y-1 sm:col-span-2">
+                      <label htmlFor="news-external-url" className="block text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                        External News URL
+                      </label>
+                      <input
+                        id="news-external-url"
+                        type="url"
+                        value={externalUrl}
+                        onChange={(e) => setExternalUrl(e.target.value)}
+                        placeholder="https://example.com/news/article"
+                        className="w-full px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs font-mono text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/80 focus:ring-2 focus:ring-amber-500/20"
+                      />
+                      {validationErrors?.external_url?.[0] && (
+                        <p className="text-xs text-red-400 font-medium">{validationErrors.external_url[0]}</p>
                       )}
                     </div>
 

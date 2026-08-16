@@ -29,5 +29,5 @@ export async function generateMetadata(): Promise<Metadata> {
 import { PhotoGallery } from "@/src/components/home/PhotoGallery";
 
 export default function GalleryPage() {
-  return <PhotoGallery />;
+  return <PhotoGallery showViewAll={false} />;
 }

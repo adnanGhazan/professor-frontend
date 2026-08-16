@@ -11,6 +11,7 @@ export interface DocumentRecord {
   file_name: string | null;
   file_extension: string | null;
   document_type: string;
+  lecture_category?: string | null;
   published_at: string | null;
   is_visible: boolean;
   created_at?: string;

@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import React, { useEffect, useState, useCallback } from "react";
 import { Student } from "@/src/types/student";
 import { StudentService } from "@/src/services/student.service";
@@ -19,11 +19,12 @@ export interface SupervisionStatItem {
 export interface StudentsSupervisionProps {
   stats?: SupervisionStatItem[];
   className?: string;
+  showViewAll?: boolean;
 }
-
 export const StudentsSupervision: React.FC<StudentsSupervisionProps> = ({
   stats: statsProp,
   className = "",
+  showViewAll = true,
 }) => {
   const [students, setStudents] = useState<Student[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -198,19 +199,17 @@ export const StudentsSupervision: React.FC<StudentsSupervisionProps> = ({
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as any)}
-                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-900 ${
-                  activeTab === tab.key
-                    ? "bg-blue-900 text-white dark:bg-blue-600 shadow-md scale-105"
-                    : "bg-white/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
-                }`}
+                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-900 ${activeTab === tab.key
+                  ? "bg-blue-900 text-white dark:bg-blue-600 shadow-md scale-105"
+                  : "bg-white/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  }`}
               >
                 <span>{tab.label}</span>
                 <span
-                  className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${
-                    activeTab === tab.key
-                      ? "bg-white/20 text-white"
-                      : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
-                  }`}
+                  className={`ml-2 px-2 py-0.5 rounded-full text-[10px] ${activeTab === tab.key
+                    ? "bg-white/20 text-white"
+                    : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                    }`}
                 >
                   {tab.count}
                 </span>
@@ -295,8 +294,8 @@ export const StudentsSupervision: React.FC<StudentsSupervisionProps> = ({
                           cat === "phd"
                             ? "accent"
                             : cat === "ms"
-                            ? "primary"
-                            : "secondary"
+                              ? "primary"
+                              : "secondary"
                         }
                         size="sm"
                         className="font-semibold"
@@ -380,7 +379,31 @@ export const StudentsSupervision: React.FC<StudentsSupervisionProps> = ({
             })}
           </div>
         )}
+        {showViewAll && !isLoading && !error && students.length > 0 && (
+          <div className="flex justify-center pt-6">
+            <Link
+              href="/students"
+              className="inline-flex items-center justify-center gap-3 px-10 py-4 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-base transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              <span>View All Students</span>
 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-5 h-5 shrink-0"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14" />
+                <path d="m13 6 6 6-6 6" />
+              </svg>
+            </Link>
+          </div>
+        )}
         {/* Supervision Statistics Section Below Cards */}
         <div className="pt-10 border-t border-slate-200/80 dark:border-slate-800/80 space-y-8">
           <div className="text-center max-w-xl mx-auto space-y-2">

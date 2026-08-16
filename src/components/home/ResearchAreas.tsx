@@ -225,13 +225,13 @@ export const ResearchAreas: React.FC<ResearchAreasProps> = ({ className = "" }) 
               })}
             </div>
 
-            {/* View All Research Action Button */}
+            {/* View All Research Areas Action Button */}
             <div className="flex justify-center pt-6">
-              <Link href="/research">
+              <Link href="/research-areas">
                 <Button
                   variant="primary"
                   size="lg"
-                  className="px-8 shadow-md"
+                  className="px-8 shadow-md cursor-pointer"
                   rightIcon={
                     <svg
                       className="w-5 h-5"
@@ -248,7 +248,7 @@ export const ResearchAreas: React.FC<ResearchAreasProps> = ({ className = "" }) 
                     </svg>
                   }
                 >
-                  View All Research
+                  View All Research Areas
                 </Button>
               </Link>
             </div>
