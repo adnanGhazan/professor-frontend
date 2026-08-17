@@ -111,4 +111,48 @@ export const AuthService = {
       document.cookie = `${TOKEN_KEY}=; path=/; max-age=0; SameSite=Lax`;
     }
   },
+
+  /**
+   * Change admin password (POST /api/v1/change-password)
+   */
+  async changePassword(data: {
+    current_password: string;
+    password: string;
+    password_confirmation: string;
+  }): Promise<{ message?: string }> {
+    const token = AuthService.getToken();
+    if (!token) {
+      throw new ApiValidationError("Unauthenticated. Please log in again.");
+    }
+
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/change-password`;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      const resJson = await response.json().catch(() => ({
+        message: response.statusText || "Server error occurred",
+      }));
+
+      if (!response.ok) {
+        const errorMsg = resJson.message || `Failed to change password (${response.status})`;
+        throw new ApiValidationError(errorMsg, resJson.errors);
+      }
+
+      return resJson;
+    } catch (error) {
+      if (error instanceof ApiValidationError) {
+        throw error;
+      }
+      console.error("AuthService.changePassword error:", error);
+      throw new ApiValidationError("Unable to process request. Please try again.");
+    }
+  },
 };

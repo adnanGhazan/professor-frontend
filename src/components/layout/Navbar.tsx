@@ -16,6 +16,7 @@ export const DEFAULT_NAV_ITEMS: NavigationItem[] = [
   { label: "Awards", href: "/awards" },
   { label: "News", href: "/news" },
   { label: "Gallery", href: "/gallery" },
+  { label: "Videos", href: "/videos" },
   { label: "Course Resources", href: "/documents" },
   { label: "Contact", href: "/contact" },
 ];

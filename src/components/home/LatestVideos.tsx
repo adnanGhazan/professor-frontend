@@ -13,9 +13,13 @@ import { Button } from "../ui/button";
 
 export interface LatestVideosProps {
   className?: string;
+  showViewAll?: boolean;
 }
 
-export const LatestVideos: React.FC<LatestVideosProps> = ({ className = "" }) => {
+export const LatestVideos: React.FC<LatestVideosProps> = ({
+  className = "",
+  showViewAll = true,
+}) => {
   const [videos, setVideos] = useState<VideoRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,8 +67,8 @@ export const LatestVideos: React.FC<LatestVideosProps> = ({ className = "" }) =>
     };
   }, [activeVideo]);
 
-  // Display top 6 videos
-  const displayedVideos = videos.slice(0, 6);
+  // Display top 6 videos on home page, or all videos on /videos page
+  const displayedVideos = showViewAll ? videos.slice(0, 6) : videos;
 
   // Date formatting helper
   const formatDate = (dateStr?: string | null) => {
@@ -278,30 +282,31 @@ export const LatestVideos: React.FC<LatestVideosProps> = ({ className = "" }) =>
           </div>
         )}
 
-        {/* View All Videos Button - commented out because /videos route does not exist
-        <div className="flex justify-center pt-4">
-          <Link href="/videos" passHref>
-            <Button
-              variant="primary"
-              size="lg"
-              className="px-8 shadow-md bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white"
-              rightIcon={
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  strokeWidth="2"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              }
-            >
-              View All Videos
-            </Button>
-          </Link>
-        </div>
-        */}
+        {/* View All Videos Button */}
+        {showViewAll && (
+          <div className="flex justify-center pt-4">
+            <Link href="/videos" passHref>
+              <Button
+                variant="primary"
+                size="lg"
+                className="px-8 shadow-md bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white"
+                rightIcon={
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                }
+              >
+                View All Videos
+              </Button>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* PLAYABLE LIGHTBOX MODAL */}

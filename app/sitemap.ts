@@ -38,6 +38,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
     },
     {
+      url: `${baseUrl}/videos`,
+      lastModified: new Date(),
+    },
+    {
       url: `${baseUrl}/contact`,
       lastModified: new Date(),
     },
