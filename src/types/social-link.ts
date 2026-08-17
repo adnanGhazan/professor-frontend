@@ -23,8 +23,8 @@ export interface SocialLink {
   label: string | null;
   url: string;
   icon: string | null;
-  sort_order: number;
   is_visible: boolean;
+  sort_order: number;
   created_at?: string;
   updated_at?: string;
 }

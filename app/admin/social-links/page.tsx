@@ -220,7 +220,7 @@ export default function AdminSocialLinksPage() {
     setUrl(item.url || "");
     setIcon(item.icon || "");
     setSortOrder(item.sort_order ?? 0);
-    setIsVisible(item.is_visible !== false);
+    setIsVisible(item.is_visible);
     setValidationErrors(null);
     setErrorMsg(null);
     setIsModalOpen(true);
@@ -559,11 +559,10 @@ export default function AdminSocialLinksPage() {
                       {/* Status Badge */}
                       <td className="py-4 px-6 text-center whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold uppercase tracking-wider border ${
-                            item.is_visible !== false
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold uppercase tracking-wider border ${item.is_visible !== false
                               ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                               : "bg-slate-800 text-slate-400 border-slate-700"
-                          }`}
+                            }`}
                         >
                           {item.is_visible !== false ? "Visible" : "Hidden"}
                         </span>

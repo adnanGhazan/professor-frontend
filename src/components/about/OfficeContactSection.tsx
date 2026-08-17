@@ -179,8 +179,9 @@ export const OfficeContactSection: React.FC<OfficeContactSectionProps> = ({
                 platform,
                 url: url.trim(),
                 label,
-                is_active: true,
-                order: 99,
+                icon: null,
+                sort_order: 99,
+                is_visible: true,
               });
             }
           }
